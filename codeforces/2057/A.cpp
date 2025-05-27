@@ -1,5 +1,5 @@
-// Problem: 欧拉函数
-// URL: https://www.acwing.com/problem/content/875/
+// Problem: A. MEX Table
+// URL: https://codeforces.com/contest/2057/problem/A
 
 #include <algorithm>
 #include <array>
@@ -18,34 +18,22 @@ using ll = long long;
 using ull = unsigned long long;
 using PII = pair<int, int>;
 
-ll phi(int x) {
-    ll res = x;
+void solve() {
+    int n, m;
+    cin >> n >> m;
+    int ans = max(n, m) + 1;
 
-    for (int i = 2; i <= x / i; i++) {
-        if (x % i != 0)
-            continue;
-        res = res * (i - 1) / i;
-        while (x % i == 0)
-            x /= i;
-    }
-    if (x > 1)
-        res = res * (x - 1) / x;
-
-    return res;
+    cout << ans << endl;
 }
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-    int n;
-    cin >> n;
-    while (n--) {
-        int x;
-        cin >> x;
-        cout << phi(x) << endl;
-    }
-
+    int T;
+    cin >> T;
+    while (T--)
+        solve();
     // ================================================
     return 0;
 }

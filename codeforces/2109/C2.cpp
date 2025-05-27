@@ -1,5 +1,5 @@
-// Problem: 欧拉函数
-// URL: https://www.acwing.com/problem/content/875/
+// Problem: C2. Hacking Numbers (Medium Version)
+// URL: https://codeforces.com/contest/2109/problem/C2
 
 #include <algorithm>
 #include <array>
@@ -18,34 +18,31 @@ using ll = long long;
 using ull = unsigned long long;
 using PII = pair<int, int>;
 
-ll phi(int x) {
-    ll res = x;
+void solve() {
+    int n;
+    cin >> n;
+    int x;
+    cout << "mul 9" << endl;
+    cin >> x;
+    cout << "digit" << endl;
+    cin >> x;
+    cout << "digit" << endl;
+    cin >> x;
+    cout << "add " << n - 9 << endl;
+    cin >> x;
 
-    for (int i = 2; i <= x / i; i++) {
-        if (x % i != 0)
-            continue;
-        res = res * (i - 1) / i;
-        while (x % i == 0)
-            x /= i;
-    }
-    if (x > 1)
-        res = res * (x - 1) / x;
-
-    return res;
+    cout << "!" << endl;
+    cin >> x;
 }
 
-int main() {
+signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-    int n;
-    cin >> n;
-    while (n--) {
-        int x;
-        cin >> x;
-        cout << phi(x) << endl;
-    }
-
+    int T;
+    cin >> T;
+    while (T--)
+        solve();
     // ================================================
     return 0;
 }

@@ -1,5 +1,5 @@
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 台阶-Nim游戏
+// URL: https://www.acwing.com/problem/content/894/
 
 #include <algorithm>
 #include <array>
@@ -40,7 +40,16 @@ signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-
+    int n;
+    cin >> n;
+    int res = 0;
+    repp(i, 1, n) {
+        int t;
+        cin >> t;
+        if (i & 1) res ^= t;
+    }
+    if (res) Yes();
+    else No();
     // ================================================
     return 0;
 }
