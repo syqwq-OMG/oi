@@ -19,38 +19,29 @@ template <class T>
 using vc = vector<T>;
 template <class T>
 using vvc = vc<vc<T>>;
-// https://trap.jp/post/1224/
-#define rep1(a) for (ll _ = 0; _ < ll(a); _++)
-#define rep2(i, a) for (ll i = 1; i <= ll(a); i++)
-#define rep3(i, a, b) for (ll i = (a); i <= ll(b); i++)
-#define rep4(i, a, b, d) for (ll i = (a); i <= ll(b); i += (d))
-#define per2(i, a) for (ll i = (a); i >= 1; i--)
-#define per3(i, a, b) for (ll i = (a); i >= ll(b); i--)
-#define per4(i, a, b, d) for (ll i = (a); i >= ll(b); i -= (d))
-#define overload4(a, b, c, d, e, ...) e
-#define rep(...) overload4(__VA_ARGS__, rep4, rep3, rep2, rep1)(__VA_ARGS__)
-#define per(...) overload4(__VA_ARGS__, per4, per3, per2)(__VA_ARGS__)
+#define rep(i, a, b) for (ll i = a; i < b; i++)
+#define repp(i, a, b) for (ll i = a; i <= b; i++)
+#define per(i, a, b) for (ll i = (a) - 1; i >= b; i--)
+#define perr(i, a, b) for (ll i = a; i >= b; i--)
 #define cint const int
 #define all(x) x.begin(), x.end()
 #define len(x) ll(x.size())
 #define MIN(v) *min_element(all(v))
 #define MAX(v) *max_element(all(v))
 template <class T, class S>
-inline bool chmax(T &_a, const S &_b) {
-    return (_a < _b ? _a = _b, 1 : 0);
+inline bool chmax(T &a, const S &b) {
+    return (a < b ? a = b, 1 : 0);
 }
 template <class T, class S>
-inline bool chmin(T &_a, const S &_b) {
-    return (_a > _b ? _a = _b, 1 : 0);
+inline bool chmin(T &a, const S &b) {
+    return (a > b ? a = b, 1 : 0);
 }
-template <class T>
-void wt(T _x) { cout << _x << " "; }
 template <class T>
 void print(T _x) { cout << _x << endl; }
 template <class T>
-void print(const T *_arr, int _l, int _r) {
-    if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
-    else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
+void print(const T *_arr, int _beg, int _end) {
+    if (_beg <= _end) repp(i, _beg, _end) cout << _arr[i] << " \n"[i == _end];
+    else perr(i, _beg, _end) cout << _arr[i] << " \n"[i == _end];
 }
 void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
 void NO(bool t = 1) { YES(!t); }
@@ -59,15 +50,30 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: C. Combination Lock
+// URL: https://codeforces.com/contest/2091/problem/C
 // ===========================================================
+cint N = 2e5 + 5;
+
+int n;
+int a[N];
+
+void solve() {
+    cin >> n;
+    if (n % 2 == 0) return print(-1);
+    int tt = 0;
+    for (int i = 1; i <= n; i += 2) a[++tt] = i;
+    for (int i = 2; i <= n; i += 2) a[++tt] = i;
+    print(a, 1, n);
+}
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-
+    int T;
+    cin >> T;
+    while (T--) solve();
     // ================================================
     return 0;
 }
