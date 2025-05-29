@@ -8,7 +8,6 @@
 #include <cstring>
 #include <iostream>
 #include <map>
-#include <numeric>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -23,16 +22,17 @@ const int N = 1e6 + 5;
 
 int n;
 vector<int> primes;
-bitset<N> st;
 ll phi[N];
+bitset<N> st; // 0 -> isprime
 
 void eular() {
     phi[1] = 1;
-    rep(i, 2, n) {
+    for (int i = 2; i <= n; i++) {
         if (!st[i]) {
             phi[i] = i - 1;
             primes.push_back(i);
         }
+
         for (int x : primes) {
             if (x > n / i)
                 break;
@@ -47,12 +47,29 @@ void eular() {
 }
 
 signed main() {
+        for (auto p : primes) {
+            if (p > n / i)
+                break;
+            st[p * i] = 1;
+            if (i % p == 0) {
+                phi[i * p] = p * phi[i];
+                break;
+            }
+            phi[i * p] = phi[i] * (p - 1);
+        }
+    }
+}
+
+int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
     cin >> n;
     eular();
-    cout << accumulate(phi + 1, phi + 1 + n, 0ll);
+
+    ll res = 0;
+    rep(i, 1, n) res += phi[i];
+    cout << res;
     // ================================================
     return 0;
 }

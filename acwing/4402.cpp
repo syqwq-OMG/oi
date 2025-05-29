@@ -59,15 +59,24 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 数字母
+// URL: https://www.acwing.com/problem/content/4402/
 // ===========================================================
+
+int cnt[30];
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-
+    char ch;
+    while (cin >> ch) {
+        if (ch == '}') break;
+        if (ch >= 'a' && ch <= 'z') cnt[ch - 'a' + 1]++;
+    }
+    int ans = 0;
+    rep(i, 26) ans += !!cnt[i];
+    print(ans);
     // ================================================
     return 0;
 }

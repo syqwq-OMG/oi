@@ -59,15 +59,25 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 组队
+// URL: https://www.acwing.com/problem/content/4416/
 // ===========================================================
+
+int n, k;
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
+    cin >> n >> k;
+    int ans = 0;
+    rep(n) {
+        int t;
+        cin >> t;
+        ans += (t + k) <= 5;
+    }
 
+    print(ans / 3);
     // ================================================
     return 0;
 }
