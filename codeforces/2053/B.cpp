@@ -22,39 +22,29 @@ using PII = pair<int, int>;
 const int N = 2e5 + 5;
 
 int n;
-vector<PII> a;
-unordered_map<int, int> cnt;
+int l[N], r[N];
+int cnt[N << 1];
+int st[N << 1];
+int sum[N << 1];
 
 void solve() {
-    a.clear();
-    cnt.clear();
-    cnt.reserve(n << 3);
-
+    rep(i, 1, n * 2) cnt[i] = 0, sum[i] = 0, st[i] = 0;
     cin >> n;
     rep(i, 1, n) {
-        int l, r;
-        cin >> l >> r;
-        a.push_back({l, r});
-        if (r == l)
-            cnt[r]++;
+        cin >> l[i] >> r[i];
+        // a.push_back({l, r});
+        if (l[i] == r[i])
+            cnt[l[i]]++, st[l[i]] = 1;
     }
-    for (auto [l, r] : a) {
-        if (l == r) {
-            if (cnt[l] < 2)
-                cout << 1;
-            else
+    rep(i, 1, n * 2) sum[i] = sum[i - 1] + st[i];
+    rep(i, 1, n) {
+        if (l[i] == r[i]) {
+            if (cnt[l[i]] >= 2)
                 cout << 0;
+            else
+                cout << 1;
         } else {
-            int i = l;
-            bool flg = 1;
-            while (i <= r) {
-                if (cnt.count(i) == 0) {
-                    flg = 0;
-                    break;
-                }
-                i++;
-            }
-            if (flg)
+            if (sum[r[i]] - sum[l[i] - 1] == r[i] - l[i] + 1)
                 cout << 0;
             else
                 cout << 1;
