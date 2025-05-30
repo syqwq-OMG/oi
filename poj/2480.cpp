@@ -71,15 +71,33 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: Longge's problem
+// URL: http://poj.org/problem?id=2480
 // ===========================================================
+
+void solve(int x) {
+    vpii primes;
+    primes.clear();
+
+    for (ll i = 2; i <= x / i; i++) {
+        if (x % i != 0) continue;
+        ll cnt = 0;
+        while (x % i == 0) x /= i, cnt++;
+        primes.push_back({i, cnt});
+    }
+    if (x > 1) primes.push_back({x, 1});
+
+    ll ans = 0;
+    for (auto [p, a] : primes) ans += (pow(p, a + 1) - 1) / (p - 1);
+    print(ans);
+}
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-
+    int n;
+    while (cin >> n) solve(n);
     // ================================================
     return 0;
 }

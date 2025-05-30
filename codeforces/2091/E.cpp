@@ -17,7 +17,7 @@ using namespace std;
 #define cdouble const double
 typedef long long ll;
 typedef unsigned long long ull;
-typedef pair<ll, ll> PII;
+typedef pair<int, int> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
 template <class T>
@@ -25,8 +25,6 @@ using vc = vector<T>;
 template <class T>
 using vvc = vc<vc<T>>;
 cint inf = 0x7f7f7f7f;
-#define fi first
-#define se second
 // https://trap.jp/post/1224/
 #define rep1(a) for (ll _ = 0; _ < ll(a); _++)
 #define rep2(i, a) for (ll i = 1; i <= ll(a); i++)
@@ -71,15 +69,43 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: E. Interesting Ratio
+// URL: https://codeforces.com/contest/2091/problem/E
 // ===========================================================
+cint N = 1e7 + 5;
+
+bitset<N> st; // 0 primes
+vi primes;
+void eular() {
+    rep(i, 2, N - 1) {
+        if (!st[i]) primes.push_back(i);
+        for (auto x : primes) {
+            if (x > N / i) break;
+            st[i * x] = 1;
+            if (i % x == 0) break;
+        }
+    }
+}
+
+void solve() {
+    int n;
+    cin >> n;
+    ll ans = 0;
+    for (auto x : primes) {
+        if (x > n) break;
+        ans += n / x;
+    }
+    print(ans);
+}
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-
+    eular();
+    int T;
+    cin >> T;
+    rep(T) solve();
     // ================================================
     return 0;
 }

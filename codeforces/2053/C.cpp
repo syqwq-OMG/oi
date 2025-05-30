@@ -25,8 +25,6 @@ using vc = vector<T>;
 template <class T>
 using vvc = vc<vc<T>>;
 cint inf = 0x7f7f7f7f;
-#define fi first
-#define se second
 // https://trap.jp/post/1224/
 #define rep1(a) for (ll _ = 0; _ < ll(a); _++)
 #define rep2(i, a) for (ll i = 1; i <= ll(a); i++)
@@ -71,15 +69,41 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: C. Bewitching Stargazer
+// URL: https://codeforces.com/contest/2053/problem/C
 // ===========================================================
+
+PII qwq(ll l, ll r, ll k) {
+    if (r - l + 1 < k) return {0, 0};
+    ll mid = (l + r) >> 1;
+
+    ll res = 0, cnt = 0;
+    if ((r - l + 1) % 2 == 1) {
+        auto [rr, cc] = qwq(l, mid - 1, k);
+        res = mid + rr * 2 + cc * (mid + 1 - l);
+        cnt = 1 + cc * 2;
+    } else {
+        auto [rr, cc] = qwq(l, mid, k);
+        res = rr * 2 + cc * (mid + 1 - l);
+        cnt = cc * 2;
+    }
+
+    return {res, cnt};
+}
+
+void solve() {
+    int n, k;
+    cin >> n >> k;
+    print(qwq(1, n, k).first);
+}
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-
+    int T;
+    cin >> T;
+    rep(T) solve();
     // ================================================
     return 0;
 }

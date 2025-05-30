@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <numeric>
 #include <queue>
 #include <stack>
 #include <unordered_map>
@@ -17,7 +18,7 @@ using namespace std;
 #define cdouble const double
 typedef long long ll;
 typedef unsigned long long ull;
-typedef pair<ll, ll> PII;
+typedef pair<int, int> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
 template <class T>
@@ -25,8 +26,6 @@ using vc = vector<T>;
 template <class T>
 using vvc = vc<vc<T>>;
 cint inf = 0x7f7f7f7f;
-#define fi first
-#define se second
 // https://trap.jp/post/1224/
 #define rep1(a) for (ll _ = 0; _ < ll(a); _++)
 #define rep2(i, a) for (ll i = 1; i <= ll(a); i++)
@@ -71,15 +70,64 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: F. Igor and Mountain
+// URL: https://codeforces.com/contest/2091/problem/F
 // ===========================================================
+
+cint N = 2005;
+cint mod = 998244353;
+
+int n, m, d;
+bool a[N][N];
+ll f[N][N][2];
+ll sum[N];
+
+ll add(ll x, ll y) { return (x + y) % mod; }
+ll sub(ll x, ll y) { return (x - y + mod) % mod; }
+
+void solve() {
+    cin >> n >> m >> d;
+    rep(i, n) rep(j, m) {
+        char t;
+        cin >> t;
+        a[i][j] = t == 'X';
+        f[i][j][0] = f[i][j][1] = sum[j] = 0;
+    }
+
+    // f[n,...,0] is processed
+    rep(i, m) f[n][i][0] = a[n][i];
+
+    per(i, n) {
+        rep(j, m) sum[j] = add(sum[j - 1], f[i][j][0]);
+
+        ll t = d;
+        rep(j, m) if (a[i][j]) {
+            ll l = max(1ll, j - t), r = min(ll(m), j + t);
+            auto &ff = f[i][j][1];
+            ff = sub(sum[r], sum[l - 1]);
+            ff = sub(ff, f[i][j][0]);
+        }
+
+        rep(j, m) sum[j] = add(sum[j - 1], f[i][j][0]), sum[j] = add(sum[j], f[i][j][1]);
+
+        t = d - 1;
+        rep(j, m) if (a[i - 1][j]) {
+            ll l = max(1ll, j - t), r = min(ll(m), j + t);
+            auto &ff = f[i - 1][j][0];
+            ff = sub(sum[r], sum[l - 1]);
+        }
+    }
+
+    print(sum[m]);
+}
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-
+    int T;
+    cin >> T;
+    rep(T) solve();
     // ================================================
     return 0;
 }

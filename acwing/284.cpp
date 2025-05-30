@@ -17,7 +17,7 @@ using namespace std;
 #define cdouble const double
 typedef long long ll;
 typedef unsigned long long ull;
-typedef pair<ll, ll> PII;
+typedef pair<int, int> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
 template <class T>
@@ -25,8 +25,6 @@ using vc = vector<T>;
 template <class T>
 using vvc = vc<vc<T>>;
 cint inf = 0x7f7f7f7f;
-#define fi first
-#define se second
 // https://trap.jp/post/1224/
 #define rep1(a) for (ll _ = 0; _ < ll(a); _++)
 #define rep2(i, a) for (ll i = 1; i <= ll(a); i++)
@@ -71,8 +69,8 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 石子合并
+// URL: https://www.acwing.com/problem/content/284/
 // ===========================================================
 
 signed main() {
