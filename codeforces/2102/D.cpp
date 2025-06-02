@@ -18,30 +18,57 @@ using ll = long long;
 using ull = unsigned long long;
 using PII = pair<int, int>;
 
-const int N = 2e5 + 5;
+const int N = 1e5 + 5;
 
 int n;
-int a[N];
-int pos[N];
-int ans[N];
+int odd[N], even[N];
+int ans[N << 1];
+
+int mgsort(int q[], int l, int r) {
+    if (l >= r)
+        return 0;
+    int mid = (l + r) >> 1;
+    int ret = (mgsort(q, l, mid) + mgsort(q, mid + 1, r)) & 1;
+    int cnt = 0, tmp[N];
+    int i = l, j = mid + 1;
+    while (i <= mid && j <= r)
+        if (q[i] <= q[j])
+            tmp[++cnt] = q[i++];
+        else
+            tmp[++cnt] = q[j++], ret += mid - i + 1;
+    while (i <= mid)
+        tmp[++cnt] = q[i++];
+    while (j <= r)
+        tmp[++cnt] = q[j++];
+    for (i = 1, j = l; j <= r; i++, j++)
+        q[j] = tmp[i];
+
+    return ret & 1;
+}
 
 void solve() {
-    memset(ans, 0, sizeof ans);
     cin >> n;
     rep(i, 1, n) {
-        cin >> a[i];
-        pos[a[i]] = i;
-    }
-    int op = 1, ep = 2;
-    rep(i, 1, n - 4) {
-        if (pos[i] % 2 == 1)
-            ans[op] = i, op += 2;
+        int t;
+        cin >> t;
+        if (i & 1)
+            odd[(i >> 1) + 1] = t;
         else
-            ans[ep] = i, ep += 2;
+            even[i >> 1] = t;
     }
-    int tmp[5];
 
-    rep(i, 1, 4) ans[n - 4 + i] = tmp[i];
+    int iv1 = mgsort(odd, 1, (n + 1) >> 1);
+    int iv2 = mgsort(even, 1, n >> 1);
+
+    rep(i, 1, n) {
+        if (i & 1)
+            ans[i] = odd[(i >> 1) + 1];
+        else
+            ans[i] = even[i >> 1];
+    }
+
+    if (iv1 != iv2)
+        swap(ans[n], ans[n - 2]);
 
     rep(i, 1, n) cout << ans[i] << " ";
     cout << endl;
@@ -55,7 +82,6 @@ int main() {
     cin >> T;
     while (T--)
         solve();
-
     // ================================================
     return 0;
 }

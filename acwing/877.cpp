@@ -1,5 +1,5 @@
-// Problem: 欧拉函数
-// URL: https://www.acwing.com/problem/content/875/
+// Problem: 快速幂
+// URL: https://www.acwing.com/problem/content/877/
 
 #include <algorithm>
 #include <array>
@@ -18,25 +18,18 @@ using ll = long long;
 using ull = unsigned long long;
 using PII = pair<int, int>;
 
-
 void solve() {
-    auto phi = [=](ll x) -> ll {
-        ll res = x;
-        for (ll i = 2; i <= x / i; i++) {
-            if (x % i != 0)
-                continue;
-            res = res * (i - 1) / i;
-            while (x % i == 0)
-                x /= i;
-        }
-        if (x > 1)
-            res = res * (x - 1) / x;
-
-        return res;
+    auto qpow = [=](ll a, ll b, ll p) -> ll {
+        ll res = 1;
+        for (ll t = a; b; b >>= 1, t = (t * t) % p)
+            if (b & 1)
+                res = (res * t) % p;
+        return res % p;
     };
-    ll x;
-    cin >> x;
-    cout << phi(x) << endl;
+
+    ll a, b, p;
+    cin >> a >> b >> p;
+    cout << qpow(a, b, p) << endl;
 }
 
 int main() {
@@ -45,10 +38,9 @@ int main() {
     // ================================================
     int n;
     cin >> n;
-
-    while (n--)
+    while (n--) {
         solve();
-
+    }
     // ================================================
     return 0;
 }
