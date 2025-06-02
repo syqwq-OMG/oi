@@ -4,11 +4,6 @@ using namespace std;
 #define cdouble const double
 typedef long long ll;
 typedef unsigned long long ull;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef __int128 i128;
-typedef unsigned __int128 u128;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
@@ -31,20 +26,14 @@ constexpr double inf<double> = inf<ll>;
 #define rep2(i, a) for (ll i = 1; i <= ll(a); i++)
 #define rep3(i, a, b) for (ll i = (a); i <= ll(b); i++)
 #define rep4(i, a, b, d) for (ll i = (a); i <= ll(b); i += (d))
-#define rp3(i, a, b) for (ll i = (a); i < ll(b); i++)
-#define rp4(i, a, b, d) for (ll i = (a); i < ll(b); i += (d))
 #define per2(i, a) for (ll i = (a); i >= 1; i--)
 #define per3(i, a, b) for (ll i = (a); i >= ll(b); i--)
 #define per4(i, a, b, d) for (ll i = (a); i >= ll(b); i -= (d))
-#define pr3(i, a, b) for (ll i = (a) - 1; i >= ll(b); i--)
-#define pr4(i, a, b, d) for (ll i = (a) - 1; i >= ll(b); i -= (d))
 #define overload4(a, b, c, d, e, ...) e
 #define rep(...) overload4(__VA_ARGS__, rep4, rep3, rep2, rep1)(__VA_ARGS__)
-#define rp(...) overload4(__VA_ARGS__, rp4, rp3)(__VA_ARGS__)
 #define per(...) overload4(__VA_ARGS__, per4, per3, per2)(__VA_ARGS__)
-#define pr(...) overload4(__VA_ARGS__, pr4, pr3)(__VA_ARGS__)
 #define mset(f, z) memset(f, z, sizeof(f))
-#define elif else if
+#define len(x) x.size()
 #define all(x, n) x + 1, x + 1 + n
 #define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
@@ -63,34 +52,60 @@ void print(const T *_arr, int _l, int _r) {
     if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
-ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
-ll qmi(ll _x, ll _y, ll _mod) {
-    ll _res = 1;
-    for (ll _t = _x; _y; _y >>= 1, _t = _t * _t % _mod)
-        if (_y & 1) _res = _res * _t % _mod;
-    return _res;
-}
 void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
 void NO(bool t = 1) { YES(!t); }
 void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
 void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
-cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 没有上司的舞会
+// URL: https://www.acwing.com/problem/content/287/
 // ===========================================================
 
+cint N = 6005;
+
+int n;
+int a[N];
+int f[N][2];
+vi g[N];
+bitset<N> st, fa;
+
+void add(int u, int v) { g[u].push_back(v), fa[v] = 1; }
+
+void dfs(int p) {
+    if (st[p]) return;
+    f[p][1] = a[p];
+    st[p] = 1;
+    for (auto x : g[p]) {
+        if (!st[x]) dfs(x);
+        f[p][0] += max(f[x][1], f[x][0]);
+        f[p][1] += f[x][0];
+    }
+}
+
 void solve() {
+    cin >> n;
+    rep(i, n) cin >> a[i];
+    rep(n - 1) {
+        int u, v;
+        cin >> u >> v;
+        add(v, u);
+    }
+    int t = 0;
+    rep(i, n) if (!fa[i]) {
+        t = i;
+        break;
+    }
+    dfs(t);
+    print(max(f[t][0], f[t][1]));
 }
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    cout.setf(ios::fixed), cout.precision(PRECISION);
     // ================================================
     int T = 1;
 #ifdef CF
