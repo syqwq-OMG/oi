@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <cmath>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -76,21 +77,40 @@ void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
 void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
-cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 分形之城
+// URL: https://www.acwing.com/problem/content/100/
 // ===========================================================
 
+double dis(PII x, PII y) {
+    double dx = x.fi - y.fi, dy = x.se - y.se;
+    return 10.0 * sqrt(dx * dx + dy * dy);
+}
+
+PII calc(ll n, ll p) {
+    if (!n) return {0, 0};
+    ll sz = 1ll << (2 * n - 2);
+    auto [x, y] = calc(n - 1, p % sz);
+    ll len = 1ll << (n - 1), z = p / sz;
+    if (z == 0) return {y, x};
+    elif (z == 1) return {x, y + len};
+    elif (z == 2) return {x + len, y + len};
+    else return {2 * len - y - 1, len - x - 1};
+}
+
 void solve() {
+    ll n, x, y;
+    cin >> n >> x >> y;
+    auto xx = calc(n, x - 1);
+    auto yy = calc(n, y - 1);
+    print(dis(xx, yy));
 }
 
 signed main() {
     ios::sync_with_stdio(0);
-    cin.tie(0);
-    cout.setf(ios::fixed), cout.precision(PRECISION);
+    cin.tie(0), cout.setf(ios::fixed), cout.precision(0);
     // ================================================
     int T = 1;
 #ifdef CF

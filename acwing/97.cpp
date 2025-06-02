@@ -45,6 +45,7 @@ constexpr double inf<double> = inf<ll>;
 #define pr(...) overload4(__VA_ARGS__, pr4, pr3)(__VA_ARGS__)
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
+#define len(x) x.size()
 #define all(x, n) x + 1, x + 1 + n
 #define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
@@ -63,11 +64,14 @@ void print(const T *_arr, int _l, int _r) {
     if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
+ll add(ll _x, ll _y, ll _mod) { return (_x + _y) % _mod; }
+ll sub(ll _x, ll _y, ll _mod) { return (_x - _y + _mod) % _mod; }
+ll mul(ll _x, ll _y, ll _mod) { return _x * _y % _mod; }
 ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
-ll qmi(ll _x, ll _y, ll _mod) {
+ll qpow(ll _x, ll _y, ll _mod) {
     ll _res = 1;
-    for (ll _t = _x; _y; _y >>= 1, _t = _t * _t % _mod)
-        if (_y & 1) _res = _res * _t % _mod;
+    for (ll _t = _x; _y; _y >>= 1, _t = mul(_t, _t, _mod))
+        if (_y & 1) _res = mul(_res, _t, _mod);
     return _res;
 }
 void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
@@ -76,21 +80,54 @@ void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
 void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
-cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 费解的开关
+// URL: https://www.acwing.com/problem/content/97/
 // ===========================================================
+cint N = 6;
+cint dx[] = {-1, 1, 0, 0, 0};
+cint dy[] = {0, 0, 0, -1, 1};
+
+char a[N][N], b[N][N];
+
+void turn(int x, int y) {
+    rep(i, 0, 4) {
+        auto &t = b[x + dx[i]][y + dy[i]];
+        t = (t == '0' ? '1' : '0');
+    }
+}
 
 void solve() {
+    rp(i, 0, 5) cin >> a[i];
+
+    int ans = inf<int>;
+    rp(op, 0, 1 << 5) {
+        int cnt = 0;
+
+        memcpy(b, a, sizeof a);
+        // operate on the 1th row
+        rp(i, 0, 5) if (op >> i & 1) turn(0, i), cnt++;
+
+        rep(i, 4) rep(j, 0, 4) if (b[i - 1][j] == '0') turn(i, j), cnt++;
+
+        if (cnt > 6) continue;
+        bool flg = 1;
+        rep(i, 0, 4) if (b[4][i] == '0') {
+            flg = 0;
+            break;
+        }
+        if (flg) chmin(ans, cnt);
+    }
+
+    if (ans == inf<int>) print(-1);
+    else print(ans);
 }
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    cout.setf(ios::fixed), cout.precision(PRECISION);
     // ================================================
     int T = 1;
 #ifdef CF
