@@ -1,5 +1,5 @@
 // Problem: 染色法判定二分图
-// URL: https://www.acwing.com/problem/content/863/
+// URL: https://www.acwing.com/problem/content/862/
 
 #include <algorithm>
 #include <array>

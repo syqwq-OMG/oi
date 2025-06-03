@@ -1,5 +1,5 @@
-// Problem: 欧拉函数
-// URL: https://www.acwing.com/problem/content/875/
+// Problem: A. It's Time To Duel
+// URL: https://codeforces.com/contest/2109/problem/0
 
 #include <algorithm>
 #include <array>
@@ -18,37 +18,36 @@ using ll = long long;
 using ull = unsigned long long;
 using PII = pair<int, int>;
 
-
+const int N = 110;
+int n;
+int a[N];
 void solve() {
-    auto phi = [=](ll x) -> ll {
-        ll res = x;
-        for (ll i = 2; i <= x / i; i++) {
-            if (x % i != 0)
-                continue;
-            res = res * (i - 1) / i;
-            while (x % i == 0)
-                x /= i;
-        }
-        if (x > 1)
-            res = res * (x - 1) / x;
+    bool flg = 1;
 
-        return res;
-    };
-    ll x;
-    cin >> x;
-    cout << phi(x) << endl;
+    cin >> n;
+    rep(i, 1, n) {
+        cin >> a[i];
+        if (a[i] == 0)
+            flg = 0;
+    }
+    rep(i, 1, n - 1) if (a[i] == 0 && a[i + 1] == 0) {
+        cout << "YES" << endl;
+        return;
+    }
+    if (flg)
+        cout << "YES" << endl;
+    else
+        cout << "NO" << endl;
 }
 
-int main() {
+signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // ================================================
-    int n;
-    cin >> n;
-
-    while (n--)
+    int T;
+    cin >> T;
+    while (T--)
         solve();
-
     // ================================================
     return 0;
 }

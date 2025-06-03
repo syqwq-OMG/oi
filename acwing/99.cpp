@@ -4,6 +4,11 @@ using namespace std;
 #define cdouble const double
 typedef long long ll;
 typedef unsigned long long ull;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef __int128 i128;
+typedef unsigned __int128 u128;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
@@ -40,6 +45,7 @@ constexpr double inf<double> = inf<ll>;
 #define pr(...) overload4(__VA_ARGS__, pr4, pr3)(__VA_ARGS__)
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
+#define len(x) x.size()
 #define all(x, n) x + 1, x + 1 + n
 #define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
@@ -50,18 +56,16 @@ auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
 void wt(const T _x) { cout << _x << " "; }
-template <>
-void wt(const PII _x) { cout << _x.fi << " " << _x.se << " "; }
 void print() { cout << endl; }
 template <class T>
-void print(const T _x) { wt(_x), print(); }
+void print(const T _x) { cout << _x << endl; }
 template <class T>
 void print(const T *_arr, int _l, int _r) {
     if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
 ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
-ll qmi(ll _x, ll _y, ll _mod) {
+ll qpow(ll _x, ll _y, ll _mod) {
     ll _res = 1;
     for (ll _t = _x; _y; _y >>= 1, _t = _t * _t % _mod)
         if (_y & 1) _res = _res * _t % _mod;
@@ -73,21 +77,53 @@ void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
 void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
-cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 约数之和
+// URL: https://www.acwing.com/problem/content/99/
 // ===========================================================
+cint mod = 9901;
+ll add(ll x, ll y) { return (x + y) % mod; }
+ll sub(ll x, ll y) { return (x - y + mod) % mod; }
+ll mul(ll x, ll y) { return x * y % mod; }
+
+ll inv(ll x) { return qpow(x, mod - 2, mod); }
+
+vpii divisors;
 
 void solve() {
+    ll a, b;
+    cin >> a >> b;
+    if (b == 0) return print(1);
+    if (a == 0) return print(0);
+
+    for (ll i = 2; i <= a / i; i++) {
+        if (a % i != 0) continue;
+        int cnt = 0;
+        while (a % i == 0) cnt++, a /= i;
+        divisors.emplace_back(i, cnt);
+    }
+    if (a > 1) divisors.emplace_back(a, 1);
+
+    ll ans = 1;
+
+    for (auto [p, q] : divisors) {
+        q *= b;
+        if ((p - 1) % mod != 0) {
+            ans = mul(ans, sub(qpow(p, q + 1, mod), 1));
+            ans = mul(ans, inv(p - 1));
+        } else {
+            ans = add(ans, q);
+        }
+    }
+
+    print(ans);
 }
 
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    cout.setf(ios::fixed), cout.precision(PRECISION);
     // ================================================
     int T = 1;
 #ifdef CF
@@ -97,4 +133,3 @@ signed main() {
     // ================================================
     return 0;
 }
-

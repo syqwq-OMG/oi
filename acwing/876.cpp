@@ -32,6 +32,21 @@ void eular() {
             phi[i] = i - 1;
             primes.push_back(i);
         }
+
+        for (int x : primes) {
+            if (x > n / i)
+                break;
+            phi[x * i] = phi[i] * (x - 1);
+            st[x * i] = 1;
+            if (i % x == 0) {
+                phi[x * i] = phi[i] * x;
+                break;
+            }
+        }
+    }
+}
+
+signed main() {
         for (auto p : primes) {
             if (p > n / i)
                 break;
@@ -51,6 +66,7 @@ int main() {
     // ================================================
     cin >> n;
     eular();
+
     ll res = 0;
     rep(i, 1, n) res += phi[i];
     cout << res;
