@@ -41,6 +41,7 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
+#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
 #define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
@@ -48,20 +49,14 @@ constexpr double inf<double> = inf<ll>;
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
-void wt(const T _x) { cout << _x; }
+void wt(const T _x) { cout << _x << " "; }
 template <>
 void wt(const PII _x) { cout << _x.fi << " " << _x.se << " "; }
 void print() { cout << endl; }
 template <class T>
 void print(const T _x) { wt(_x), print(); }
-template <class Head, class... Tail>
-void print(Head &&head, Tail &&...tail) {
-    wt(head);
-    if (sizeof...(Tail)) wt(' ');
-    print(std::forward<Tail>(tail)...);
-}
 template <class T>
-void arprint(const T *_arr, int _l, int _r) {
+void print(const T *_arr, int _l, int _r) {
     if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
@@ -82,11 +77,34 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 激光炸弹
+// URL: https://www.acwing.com/problem/content/description/101/
 // ===========================================================
+cint N = 5005;
+
+int n, r;
+int s[N][N];
+
+int qwq(int x, int y) {
+    int xx = x + r - 1, yy = y + r - 1;
+    if (xx > 5001 || yy > 5001) return -inf<int>;
+    return s[xx][yy] - s[x - 1][yy] - s[xx][y - 1] + s[x - 1][y - 1];
+}
 
 void solve() {
+    cin >> n >> r;
+    chmin(r, 5001);
+    rep(n) {
+        int x, y, w;
+        cin >> x >> y >> w;
+        s[x + 1][y + 1] += w;
+    }
+
+    rep(i, 5001) rep(j, 5001) s[i][j] = s[i - 1][j] + s[i][j - 1] - s[i - 1][j - 1] + s[i][j];
+
+    int ans = -inf<int>;
+    rep(i, 5001) rep(j, 5001) chmax(ans, qwq(i, j));
+    print(ans);
 }
 
 signed main() {

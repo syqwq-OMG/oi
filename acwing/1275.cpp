@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <cmath>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -41,6 +42,7 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
+#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
 #define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
@@ -82,11 +84,35 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 天才的记忆
+// URL: https://www.acwing.com/problem/content/1275/
 // ===========================================================
+cint N = 2e5 + 5, M = 18;
+
+int n, m;
+int a[N];
+int f[N][20];
+
+void init() {
+    rp(len, 0, M) for (int l = 1; l + (1 << len) - 1 <= n; l++)
+        f[l][len] = len ? max(f[l][len - 1], f[l + (1 << (len - 1))][len - 1]) : a[l];
+}
+
+int query(int l, int r) {
+    int len = log2(r - l + 1);
+    return max(f[l][len], f[r - (1 << len) + 1][len]);
+}
 
 void solve() {
+    cin >> n;
+    rep(i, n) cin >> a[i];
+    init();
+    cin >> m;
+    rep(m) {
+        int l, r;
+        cin >> l >> r;
+        print(query(l, r));
+    }
 }
 
 signed main() {

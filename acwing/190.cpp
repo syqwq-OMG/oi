@@ -82,11 +82,47 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 武士风度的牛
+// URL: https://www.acwing.com/problem/content/190/
 // ===========================================================
+cint N = 155;
+cint dx[] = {-1, -1, -2, -2, 1, 1, 2, 2};
+cint dy[] = {2, -2, 1, -1, 2, -2, 1, -1};
+
+int n, m;
+PII s;
+char a[N][N];
+bool st[N][N];
+int dis[N][N];
+
+bool check(int x, int y) { return !st[x][y] && 1 <= x && x <= n && 1 <= y && y <= m; }
+
+int bfs() {
+    queue<PII> q;
+    q.push(s);
+    st[s.fi][s.se] = 1;
+    while (q.size()) {
+        auto [x, y] = q.front();
+        q.pop();
+        rep(i, 0, 7) {
+            int xx = x + dx[i], yy = y + dy[i];
+            if (!check(xx, yy)) continue;
+            if (a[xx][yy] == '*') continue;
+            dis[xx][yy] = dis[x][y] + 1, st[xx][yy] = 1;
+            if (a[xx][yy] == 'H') return dis[xx][yy];
+            q.push({xx, yy});
+        }
+    }
+    return -1;
+}
 
 void solve() {
+    cin >> m >> n;
+    rep(i, n) rep(j, m) {
+        cin >> a[i][j];
+        if (a[i][j] == 'K') s = {i, j};
+    }
+    print(bfs());
 }
 
 signed main() {

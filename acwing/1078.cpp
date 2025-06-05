@@ -41,6 +41,7 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
+#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
 #define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
@@ -82,11 +83,46 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 迷宫问题
+// URL: https://www.acwing.com/problem/content/1078/
 // ===========================================================
+cint N = 1005;
+cint dx[] = {-1, 1, 0, 0};
+cint dy[] = {0, 0, -1, 1};
+
+int n;
+bool a[N][N];
+bool s[N][N];
+PII p[N][N];
+
+void dfs(int x, int y) {
+    if (x == 1 && y == 1) return print(0, 0);
+    dfs(p[x][y].fi, p[x][y].se);
+    print(x - 1, y - 1);
+}
+
+bool check(int x, int y) { return !s[x][y] && 1 <= x && x <= n && 1 <= y && y <= n; }
+
+void bfs() {
+    queue<PII> q;
+    q.push({1, 1}), s[1][1] = 1;
+    while (q.size()) {
+        auto [x, y] = q.front();
+        q.pop();
+        rep(i, 0, 3) {
+            int xx = x + dx[i], yy = y + dy[i];
+            if (!check(xx, yy) || a[xx][yy]) continue;
+            s[xx][yy] = 1, p[xx][yy] = {x, y}, q.push({xx, yy});
+            if (xx == n && yy == n) return;
+        }
+    }
+}
 
 void solve() {
+    cin >> n;
+    rep(i, n) rep(j, n) cin >> a[i][j];
+    bfs();
+    dfs(n, n);
 }
 
 signed main() {

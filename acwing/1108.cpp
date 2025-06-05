@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <locale>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -41,6 +42,7 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
+#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
 #define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
@@ -82,11 +84,50 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 山峰和山谷
+// URL: https://www.acwing.com/problem/content/1108/
 // ===========================================================
+cint N = 1005;
+cint dx[] = {-1, 1, 0, 0, -1, -1, 1, 1};
+cint dy[] = {0, 0, -1, 1, 1, -1, 1, -1};
+
+int n;
+int a[N][N];
+bool st[N][N];
+
+bool check(int x, int y) { return 1 <= x && x <= n && 1 <= y && y <= n; }
+
+pair<bool, bool> bfs(int sx, int sy) {
+    if (st[sx][sy]) return {0, 0};
+    bool hi = 1, lo = 1;
+    queue<PII> q;
+    q.push({sx, sy}), st[sx][sy] = 1;
+    while (q.size()) {
+        auto [x, y] = q.front();
+        q.pop();
+        rep(i, 0, 7) {
+            int xx = x + dx[i], yy = y + dy[i];
+            if (!check(xx, yy)) continue;
+            if (st[xx][yy] && a[xx][yy] == a[x][y]) continue;
+
+            if (a[xx][yy] == a[x][y]) st[xx][yy] = 1, q.push({xx, yy});
+            elif (a[xx][yy] > a[x][y]) hi = 0;
+            else lo = 0;
+        }
+    }
+    return {hi, lo};
+}
 
 void solve() {
+    cin >> n;
+    rep(i, n) rep(j, n) cin >> a[i][j];
+
+    int qwq = 0, awa = 0;
+    rep(i, n) rep(j, n) {
+        auto [h, l] = bfs(i, j);
+        qwq += l, awa += h;
+    }
+    print(awa, qwq);
 }
 
 signed main() {

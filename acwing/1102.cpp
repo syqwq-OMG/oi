@@ -82,11 +82,33 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 抓住那头牛
+// URL: https://www.acwing.com/problem/content/1102/
 // ===========================================================
+cint N = 1e5 + 5;
+
+int f, c;
+int dis[N];
+
+int bfs() {
+    queue<int> q;
+    q.push(f), dis[f] = 0;
+    while (q.size()) {
+        int x = q.front();
+        q.pop();
+        if (x - 1 >= 0) dis[x - 1] = dis[x - 1] == -1 ? q.push(x - 1), dis[x] + 1 : dis[x - 1];
+        dis[x + 1] = dis[x + 1] == -1 ? q.push(x + 1), dis[x] + 1 : dis[x + 1];
+        if (x * 2 < N) dis[x * 2] = dis[x * 2] == -1 ? q.push(x * 2), dis[x] + 1 : dis[x * 2];
+        if (x - 1 == c || x + 1 == c || x * 2 == c) return dis[x] + 1;
+    }
+    return dis[c];
+}
 
 void solve() {
+    mset(dis, -1);
+    cin >> f >> c;
+    if (f == c) return print(0);
+    else return print(bfs());
 }
 
 signed main() {

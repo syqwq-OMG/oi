@@ -41,6 +41,7 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
+#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
 #define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
@@ -48,20 +49,14 @@ constexpr double inf<double> = inf<ll>;
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
-void wt(const T _x) { cout << _x; }
+void wt(const T _x) { cout << _x << " "; }
 template <>
 void wt(const PII _x) { cout << _x.fi << " " << _x.se << " "; }
 void print() { cout << endl; }
 template <class T>
 void print(const T _x) { wt(_x), print(); }
-template <class Head, class... Tail>
-void print(Head &&head, Tail &&...tail) {
-    wt(head);
-    if (sizeof...(Tail)) wt(' ');
-    print(std::forward<Tail>(tail)...);
-}
 template <class T>
-void arprint(const T *_arr, int _l, int _r) {
+void print(const T *_arr, int _l, int _r) {
     if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
@@ -82,11 +77,36 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 最佳牛围栏
+// URL: https://www.acwing.com/problem/content/104/
 // ===========================================================
+cint N = 1e5 + 5;
+cdouble eps = 1e-5;
+
+int n, f;
+int a[N];
+double s[N];
+
+bool check(double x) {
+    double ans = 0;
+    rep(i, n) s[i] = s[i - 1] + a[i] - x;
+    double mn = s[0];
+    rep(i, f, n) chmax(ans, s[i] - mn), chmin(mn, s[i - f + 1]);
+    return ans > 0;
+}
 
 void solve() {
+    cin >> n >> f;
+    rep(i, n) cin >> a[i];
+
+    double l = 1, r = 2000;
+    while (r - l > eps) {
+        auto mid = (l + r) / 2;
+        if (check(mid)) l = mid;
+        else r = mid;
+    }
+
+    print(int(r * 1000.0));
 }
 
 signed main() {

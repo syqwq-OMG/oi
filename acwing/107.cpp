@@ -41,6 +41,7 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
+#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
 #define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
@@ -52,18 +53,11 @@ void wt(const T _x) { cout << _x; }
 template <>
 void wt(const PII _x) { cout << _x.fi << " " << _x.se << " "; }
 void print() { cout << endl; }
-template <class T>
-void print(const T _x) { wt(_x), print(); }
 template <class Head, class... Tail>
 void print(Head &&head, Tail &&...tail) {
     wt(head);
     if (sizeof...(Tail)) wt(' ');
     print(std::forward<Tail>(tail)...);
-}
-template <class T>
-void arprint(const T *_arr, int _l, int _r) {
-    if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
-    else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
 ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
 ll qmi(ll _x, ll _y, ll _mod) {
@@ -82,11 +76,39 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 七夕祭
+// URL: https://www.acwing.com/problem/content/description/107/
 // ===========================================================
+cint N = 1e5 + 5;
+
+int n, m, tt;
+int a[N], b[N];
+ll t[N];
+
+ll doo(int *f, int v) {
+    ll mm = tt / v;
+    rep(i, 2, v) t[i] = t[i - 1] + f[i - 1] - mm;
+    sort(all(t, v));
+    mm = t[(v + 1) >> 1];
+    ll ret = 0;
+    rep(i, 1, v) ret += abs(mm - t[i]);
+    return ret;
+}
 
 void solve() {
+    cin >> n >> m >> tt;
+    rep(tt) {
+        int x, y;
+        cin >> x >> y;
+        a[x]++, b[y]++;
+    }
+
+    ll ans1 = tt % n == 0 ? doo(a, n) : -1;
+    ll ans2 = tt % m == 0 ? doo(b, m) : -1;
+    if (ans1 == -1 && ans2 == -1) print("impossible");
+    elif (ans1 == -1 && ans2 != -1) print("column", ans2);
+    elif (ans1 != -1 && ans2 == -1) print("row", ans1);
+    else print("both", ans1 + ans2);
 }
 
 signed main() {

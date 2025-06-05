@@ -1,4 +1,6 @@
 #include <bits/stdc++.h>
+#include <functional>
+#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -41,6 +43,7 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
+#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
 #define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
@@ -80,13 +83,39 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 动态中位数
+// URL: https://www.acwing.com/problem/content/108/
 // ===========================================================
+cint N = 5e5 + 5;
+
+int P, n;
+
+void doo() {
+    priority_queue<int> small;
+    priority_queue<int, vc<int>, greater<int>> big;
+
+    int cnt = 0, len = 0;
+    rep(i, n) {
+        int x;
+        cin >> x;
+
+        if (small.empty() || x <= small.top()) small.push(x);
+        else big.push(x);
+        while (big.size() > small.size()) small.push(big.top()), big.pop();
+        while (small.size() > big.size() + 1) big.push(small.top()), small.pop();
+
+        if (i & 1) len++, wt(small.top()), wt(' ');
+        if (len == 10) len = 0, print();
+    }
+    if (len) print();
+}
 
 void solve() {
+    cin >> P >> n;
+    print(P, (n + 1) / 2);
+    doo();
 }
 
 signed main() {

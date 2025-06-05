@@ -41,6 +41,7 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
+#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
 #define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
@@ -82,11 +83,36 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 超快速排序
+// URL: https://www.acwing.com/problem/content/109/
 // ===========================================================
+cint N = 5e5 + 5;
+
+int n;
+int a[N];
+
+ll mgsort(int *f, int l, int r) {
+    if (l >= r) return 0;
+    int mid = (l + r) >> 1;
+    ll ret = mgsort(f, l, mid) + mgsort(f, mid + 1, r);
+    int cnt = 0, t[N];
+    int i = l, j = mid + 1;
+    while (i <= mid && j <= r) {
+        if (f[i] <= f[j]) t[++cnt] = f[i++];
+        else t[++cnt] = f[j++], ret += mid - i + 1;
+    }
+    while (i <= mid) t[++cnt] = f[i++];
+    while (j <= r) t[++cnt] = f[j++];
+    for (i = l, j = 1; i <= r; i++, j++) f[i] = t[j];
+    return ret;
+}
 
 void solve() {
+    while (cin >> n, n) {
+        rep(i, n) cin >> a[i];
+        ll ans = mgsort(a, 1, n);
+        print(ans);
+    }
 }
 
 signed main() {
