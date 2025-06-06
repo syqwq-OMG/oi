@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <unordered_map>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -80,11 +81,49 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 字串变换
+// URL: https://www.acwing.com/problem/content/192/
 // ===========================================================
+cint N = 10;
+using msi = unordered_map<string, int>;
+
+string a, b;
+int n = 0;
+string ra[N], rb[N];
+
+int extend(queue<string> &q, msi &ma, msi &mb, string from[], string to[]) {
+    string s = q.front();
+    q.pop();
+    rp(i, 0, s.size())
+        rep(j, n) if (s.substr(i, from[j].size()) == from[j]) {
+        string t = s.substr(0, i) + to[j] + s.substr(i + from[j].size());
+        if (mb.count(t)) return ma[s] + 1 + mb[t];
+        if (ma.count(t)) continue;
+        ma[t] = ma[s] + 1, q.push(t);
+    }
+    return inf<int>;
+}
+
+int bfs(string sa, string sb) {
+    if (sa == sb) return 0;
+
+    unordered_map<string, int> ma, mb;
+    queue<string> qa, qb;
+
+    ma[sa] = 0, mb[sb] = 0, qa.push(sa), qb.push(sb);
+    while (qa.size() && qb.size()) {
+        int t = qa.size() <= qb.size() ? extend(qa, ma, mb, ra, rb) : extend(qb, mb, ma, rb, ra);
+        if (t <= 10) return t;
+    }
+    return inf<int>;
+}
 
 void solve() {
+    cin >> a >> b;
+    while (cin >> ra[++n] >> rb[n]);
+    int ans = bfs(a, b);
+    if (ans > 10) print("NO ANSWER!");
+    else print(ans);
 }
 
 signed main() {

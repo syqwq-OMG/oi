@@ -78,13 +78,53 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 电路维修
+// URL: https://www.acwing.com/problem/content/description/177/
 // ===========================================================
+cint N = 505;
+cint dx[] = {-1, 1, 1, -1};
+cint dy[] = {1, 1, -1, -1};
+cint ix[] = {0, 1, 1, 0};
+cint iy[] = {1, 1, 0, 0};
+const string cd = "/\\/\\";
+
+int n, m;
+char a[N][N];
+int dis[N][N];
+bool st[N][N];
+
+int bfs() {
+    mset(dis, 0x7f), mset(st, 0);
+    auto check = [](int x, int y) { return 0 <= x && x <= n && 0 <= y && y <= m; };
+
+    deque<PII> q;
+    dis[0][0] = 0, q.push_back({0, 0});
+    while (q.size()) {
+        auto [x, y] = q.front();
+        q.pop_front();
+        if (st[x][y]) continue;
+        st[x][y] = 1;
+        if (x == n && y == m) return dis[n][m];
+        rep(i, 0, 3) {
+            int xx = x + dx[i], yy = y + dy[i];
+            if (!check(xx, yy)) continue;
+            int w = a[x + ix[i]][y + iy[i]] != cd[i];
+            if (chmin(dis[xx][yy], dis[x][y] + w)) {
+                if (w) q.push_back({xx, yy});
+                else q.push_front({xx, yy});
+            }
+        }
+    }
+    return dis[n][m];
+}
 
 void solve() {
+    cin >> n >> m;
+    rep(i, n) cin >> (a[i] + 1);
+    if (n + m & 1) return print("NO SOLUTION");
+    else return print(bfs());
 }
 
 signed main() {

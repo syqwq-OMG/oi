@@ -80,11 +80,39 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 矩阵距离
+// URL: https://www.acwing.com/problem/content/175/
 // ===========================================================
+cint N = 1005;
+cint dx[] = {-1, 1, 0, 0};
+cint dy[] = {0, 0, 1, -1};
+
+int n, m;
+char a[N][N];
+int dis[N][N];
+
+bool check(int x, int y) { return dis[x][y] == inf<int> && 1 <= x && x <= n && 1 <= y && y <= m; }
+
+void bfs() {
+    queue<PII> q;
+    rep(i, n) rep(j, m) dis[i][j] = a[i][j] == '1' ? q.push({i, j}), 0 : inf<int>;
+    while (q.size()) {
+        auto [x, y] = q.front();
+        q.pop();
+        rep(i, 0, 3) {
+            int xx = x + dx[i], yy = y + dy[i];
+            if (!check(xx, yy)) continue;
+            dis[xx][yy] = dis[x][y] + 1;
+            q.push({xx, yy});
+        }
+    }
+}
 
 void solve() {
+    cin >> n >> m;
+    rep(i, n) cin >> (a[i] + 1);
+    bfs();
+    rep(i, n) aprint(dis[i], 1, m);
 }
 
 signed main() {

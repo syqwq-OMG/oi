@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <unordered_map>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -80,11 +81,52 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 魔板
+// URL: https://www.acwing.com/problem/content/1109/
 // ===========================================================
+string tar;
+string st = "12348765";
+unordered_map<string, int> mp;
+unordered_map<string, pair<char, string>> p;
+
+string get(string s, int op) {
+    if (op == 0) return {s[4], s[5], s[6], s[7], s[0], s[1], s[2], s[3]};
+    if (op == 1) return {s[3], s[0], s[1], s[2], s[7], s[4], s[5], s[6]};
+    return {s[0], s[5], s[1], s[3], s[4], s[6], s[2], s[7]};
+}
+
+void bfs() {
+    queue<string> q;
+    q.push(st);
+    mp[st] = 0;
+    while (q.size()) {
+        auto x = q.front();
+        q.pop();
+        rep(i, 0, 2) {
+            auto t = get(x, i);
+            if (mp.find(t) != mp.end()) continue;
+            mp[t] = mp[x] + 1, p[t] = {'A' + i, x}, q.push(t);
+            if (t == tar) return;
+        }
+    }
+}
+
+void dfs(string s) {
+    if (s == st) return;
+    dfs(p[s].se);
+    wt(p[s].fi);
+}
 
 void solve() {
+    rep(8) {
+        int t;
+        cin >> t;
+        tar += '0' + t;
+    }
+    swap(tar[4], tar[7]), swap(tar[5], tar[6]);
+    bfs();
+    print(mp[tar]);
+    dfs(tar);
 }
 
 signed main() {
