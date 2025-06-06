@@ -77,11 +77,45 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: C. Crazy Diamond
+// URL: https://codeforces.com/contest/1148/problem/C
 // ===========================================================
+cint N = 3e5 + 5;
+
+int n;
+int a[N];
+int p[N];
+vpii ans;
+
+// only swap
+void sw(int x, int y) {
+    ans.emplace_back(x, y);
+    p[a[y]] = x, p[a[x]] = y;
+    swap(a[x], a[y]);
+}
+
+bool check(int x, int y) { return 2 * abs(x - y) >= n; }
+
+// swap num at 2 indexes
+void qwq(int x, int y) {
+    if (x == y) return;
+    if (check(x, y)) return sw(x, y);
+    if (check(x, 1) && check(y, 1)) return sw(1, y), sw(1, x), sw(1, y);
+    if (check(x, n) && check(y, n)) return sw(n, y), sw(n, x), sw(n, y);
+
+    if (check(x, n)) return sw(x, n), qwq(n, y), sw(x, n);
+    else return sw(x, 1), qwq(1, y), sw(x, 1);
+}
 
 void solve() {
+    cin >> n;
+    rep(i, n) {
+        cin >> a[i];
+        p[a[i]] = i;
+    }
+    rep(i, n) qwq(i, p[i]);
+    print(ans.size());
+    for (auto x : ans) print(x);
 }
 
 signed main() {
