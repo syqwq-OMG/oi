@@ -64,6 +64,12 @@ void aprint(const T *_arr, int _l, int _r) {
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
 ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
+ll qmi(ll _x, ll _y, ll _mod) {
+    ll _res = 1;
+    for (ll _t = _x; _y; _y >>= 1, _t = _t * _t % _mod)
+        if (_y & 1) _res = _res * _t % _mod;
+    return _res;
+}
 void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
 void NO(bool t = 1) { YES(!t); }
 void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
@@ -74,11 +80,38 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 加成序列
+// URL: https://www.acwing.com/problem/content/172/
 // ===========================================================
+cint N = 105;
+
+int n, a[N];
+
+bool dfs(int u, int dep) {
+    if (u > dep) return 0;
+    bitset<N> st;
+    per(i, u - 1, 1) per(j, i, 1) {
+        int t = a[i] + a[j];
+        if (t > n || t < a[u - 1] || st[t]) continue;
+        st[t] = 1, a[u] = t;
+        if (a[u] == n) return 1;
+        if (dfs(u + 1, dep)) return 1;
+        st[t] = 0;
+    }
+    return 0;
+}
 
 void solve() {
+    while (cin >> n, n) {
+        if (n == 1) {
+            print(1);
+            continue;
+        }
+        a[1] = 1;
+        int depth = 1;
+        while (!dfs(2, depth)) depth++;
+        aprint(a, 1, depth);
+    }
 }
 
 signed main() {

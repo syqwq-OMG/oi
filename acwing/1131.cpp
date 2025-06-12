@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -74,11 +75,43 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 热浪
+// URL: https://www.acwing.com/problem/content/1131/
 // ===========================================================
+cint N = 2505;
+
+int n, m;
+vpii g[N];
+int dis[N];
+bitset<N> st;
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+
+int dijkstra(int start, int end) {
+    st &= 0, mset(dis, 0x7f);
+    priority_queue<PII> pq;
+    dis[start] = 0, pq.push({0, start});
+    while (pq.size()) {
+        int x = pq.top().se;
+        pq.pop();
+        if (st[x]) continue;
+        st[x] = 1;
+        for (auto [y, w] : g[x])
+            if (chmin(dis[y], dis[x] + w)) pq.push({-dis[y], y});
+    }
+    return dis[end];
+}
 
 void solve() {
+    cin >> n >> m;
+    int s, e;
+    cin >> s >> e;
+    rep(m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w), add(v, u, w);
+    }
+    print(dijkstra(s, e));
 }
 
 signed main() {

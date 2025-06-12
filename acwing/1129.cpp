@@ -1,4 +1,6 @@
 #include <bits/stdc++.h>
+#include <numeric>
+#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -74,11 +76,50 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 香甜的黄油
+// URL: https://www.acwing.com/problem/content/1129/
 // ===========================================================
+cint N = 808;
+
+ll n, f, m, cow[N];
+vpii g[N];
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+ll dijkstra(int farm) {
+    ll dis[N];
+    bitset<N> st;
+    priority_queue<PII> pq;
+    rep(i, f) dis[i] = inf<ll>;
+    dis[farm] = 0, pq.push({0, farm});
+    while (pq.size()) {
+        int x = pq.top().se;
+        pq.pop();
+        if (st[x]) continue;
+        st[x] = 1;
+        for (auto [y, w] : g[x])
+            if (chmin(dis[y], dis[x] + w))
+                pq.push({-dis[y], y});
+    }
+    ll sum = 0ll;
+    rep(i, f) sum += dis[i] * cow[i];
+    return sum;
+}
 
 void solve() {
+    cin >> n >> f >> m;
+    rep(i, n) {
+        int t;
+        cin >> t;
+        cow[t]++;
+    }
+    rep(m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w), add(v, u, w);
+    }
+    ll ans = inf<ll>;
+    rep(i, f) chmin(ans, dijkstra(i));
+    print(ans);
 }
 
 signed main() {

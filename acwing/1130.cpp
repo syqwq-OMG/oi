@@ -74,11 +74,32 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 信使
+// URL: https://www.acwing.com/problem/content/1130/
 // ===========================================================
+cint N = 105;
+
+int n, m;
+ll dis[N][N];
+
+ll floyd() {
+    rep(k, n) rep(i, n) rep(j, n)
+        chmin(dis[i][j], dis[i][k] + dis[k][j]);
+    return MAX(dis[1], n);
+}
 
 void solve() {
+    cin >> n >> m;
+    rep(i, n) rep(j, n) dis[i][j] = inf<ll>;
+    rep(i, n) dis[i][i] = 0;
+    rep(m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        chmin(dis[u][v], w), chmin(dis[v][u], w);
+    }
+    ll t = floyd();
+    if (t == inf<ll>) print(-1);
+    else print(t);
 }
 
 signed main() {

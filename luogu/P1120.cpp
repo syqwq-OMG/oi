@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <bitset>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -64,6 +65,12 @@ void aprint(const T *_arr, int _l, int _r) {
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
 ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
+ll qmi(ll _x, ll _y, ll _mod) {
+    ll _res = 1;
+    for (ll _t = _x; _y; _y >>= 1, _t = _t * _t % _mod)
+        if (_y & 1) _res = _res * _t % _mod;
+    return _res;
+}
 void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
 void NO(bool t = 1) { YES(!t); }
 void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
@@ -74,11 +81,50 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: P1120 小木棍
+// URL: https://www.luogu.com.cn/problem/P1120
 // ===========================================================
+cint N = 70;
+
+int n, a[N];
+bitset<N> st;
+int sum, length;
+
+bool dfs(int done, int len, int k) {
+    if (done * length == sum) return 1;
+    if (len == length) return dfs(done + 1, 0, 1);
+
+    rep(i, k, n) {
+        if (st[i] || len + a[i] > length) continue;
+
+        st[i] = 1;
+        if (dfs(done, len + a[i], k + 1)) return 1;
+        st[i] = 0;
+
+        if (len == 0 || len + a[i] == length) return 0;
+
+        int l = i + 1, r = n;
+        while (l < r) {
+            int mid = (l + r) >> 1;
+            if (a[mid] != a[i]) r = mid;
+            else l = mid + 1;
+        }
+        i = l - 1;
+    }
+
+    return 0;
+}
 
 void solve() {
+    cin >> n;
+    st &= 0, sum = 0;
+    rep(i, n) cin >> a[i], sum += a[i];
+    sort(all(a, n), greater<int>());
+    length = a[1];
+    while (length <= sum) {
+        if (sum % length == 0 && dfs(0, 0, 1)) return print(length);
+        length++;
+    }
 }
 
 signed main() {

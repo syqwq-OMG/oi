@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -70,15 +71,45 @@ void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
 void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
-cint PRECISION = 5;
+cint PRECISION = 8;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 最小花费
+// URL: https://www.acwing.com/problem/content/1128/
 // ===========================================================
+cint N = 2005;
 
+int n, m, aa, bb;
+vc<pair<int, double>> g[N];
+double dis[N];
+bitset<N> st;
+
+void add(int u, int v, double w) { g[u].push_back({v, w}); }
+void dijkstra() {
+    rep(i, n) dis[i] = 0.0;
+    priority_queue<pair<double, int>> pq;
+    dis[aa] = 1.0, pq.push({1.0, aa});
+    while (pq.size()) {
+        int u = pq.top().se;
+        pq.pop();
+        if (st[u]) continue;
+        st[u] = 1;
+        for (auto [v, w] : g[u])
+            if (chmax(dis[v], dis[u] * w)) pq.push({dis[v], v});
+    }
+}
 void solve() {
+    cin >> n >> m;
+    rep(m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        double t = (double)(100 - w) / 100.0;
+        add(u, v, t), add(v, u, t);
+    }
+    cin >> aa >> bb;
+    dijkstra();
+    print(100.0 / dis[bb]);
 }
 
 signed main() {

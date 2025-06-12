@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <bits/stdc++.h>
 using namespace std;
 #define cint const int
@@ -64,6 +65,12 @@ void aprint(const T *_arr, int _l, int _r) {
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
 ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
+ll qmi(ll _x, ll _y, ll _mod) {
+    ll _res = 1;
+    for (ll _t = _x; _y; _y >>= 1, _t = _t * _t % _mod)
+        if (_y & 1) _res = _res * _t % _mod;
+    return _res;
+}
 void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
 void NO(bool t = 1) { YES(!t); }
 void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
@@ -74,11 +81,55 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 送礼物
+// URL: https://www.acwing.com/problem/content/description/173/
 // ===========================================================
+cint N = 50;
+
+ll n, w, a[N];
+ll sz = 0, mp[1 << 23];
+ll ans = 0;
+
+void table(int u, const int r) {
+    if (u > r) return;
+    ll m = sz;
+    rep(i, 0, m) if (mp[i] + a[u] <= w) mp[++sz] = mp[i] + a[u];
+    table(u + 1, r);
+}
+
+bool dfs(int u, ll sum) {
+    if (ans == w) return 1;
+    if (sum > w) return 0;
+    if (u > n) {
+        if (sum + mp[sz] <= w) chmax(ans, sum + mp[sz]);
+        else {
+            ll l = 0, r = sz;
+            while (l < r) {
+                ll mid = (l + r + 1) >> 1;
+                if (mp[mid] + sum <= w) l = mid;
+                else r = mid - 1;
+            }
+            chmax(ans, sum + mp[l]);
+        }
+        return ans == w;
+    }
+    if (dfs(u + 1, sum)) return 1;
+    if (dfs(u + 1, sum + a[u])) return 1;
+    return 0;
+}
 
 void solve() {
+    cin >> w >> n;
+    rep(i, n) cin >> a[i];
+
+    sort(all(a, n), greater<int>());
+    ll mid = n >> 1;
+    table(1, mid);
+    sort(all(mp, sz));
+    sz = unique(all(mp, sz)) - mp - 1;
+
+    dfs(mid + 1, 0);
+    print(ans);
 }
 
 signed main() {
