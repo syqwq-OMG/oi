@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -43,6 +44,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -69,14 +72,57 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
-// #define int long long
+#define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: P1462 通往奥格瑞玛的道路
+// URL: https://www.luogu.com.cn/problem/P1462
 // ===========================================================
+cint N = 1e4 + 5;
 
+int n, m, b, cost[N], mx = 0;
+int dis[N];
+bitset<N> st;
+vpii g[N];
+
+void add(int u, int v, int b) {
+    g[u].push_back({v, b});
+}
+bool check(int bound) {
+    if (cost[1] > bound) return 0;
+    rep(i, n) dis[i] = inf<int>;
+    st &= 0;
+    priority_queue<PII> pq;
+    dis[1] = 0, pq.push({0, 1});
+    while (pq.size()) {
+        int x = pq.top().se;
+        pq.pop();
+        if (st[x]) continue;
+        st[x] = 1;
+        for (auto [y, w] : g[x]) {
+            if (cost[y] > bound) continue;
+            if (chmin(dis[y], dis[x] + w)) pq.push({-dis[y], y});
+        }
+    }
+    return dis[n] <= b;
+}
 void solve() {
+    cin >> n >> m >> b;
+    rep(i, n) cin >> cost[i], chmax(mx, cost[i]);
+    rep(m) {
+        int u, v, b;
+        cin >> u >> v >> b;
+        if (u == v) continue;
+        add(u, v, b), add(v, u, b);
+    }
+    int l = 0, r = mx + 1;
+    while (l < r) {
+        int mid = (l + r) >> 1;
+        if (check(mid)) r = mid;
+        else l = mid + 1;
+    }
+    if (l > mx) print("AFK");
+    else print(l);
 }
 
 signed main() {

@@ -43,6 +43,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -70,13 +72,20 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: A. Simple Palindrome
+// URL: https://codeforces.com/problemset/problem/2005/A
 // ===========================================================
-
+string s = "aeiou";
+int n;
 void solve() {
+    cin >> n;
+    n--;
+    int a = n / 5, b = n % 5;
+    rep(i, 0, b) rep(a + 1) wt(s[i]);
+    rep(i, b + 1, 4) rep(a) wt(s[i]);
+    print();
 }
 
 signed main() {

@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <bitset>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -43,6 +44,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -72,11 +75,61 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 新年好
+// URL: https://www.acwing.com/problem/content/1137/
 // ===========================================================
+cint N = 5e4 + 5;
+
+int n, m, sta[7], dis[7][N];
+vpii g[N];
+int ord[7];
+int ans = inf<int>;
+bitset<7> used;
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+void dijkstra(int start, int *d) {
+    rep(i, n) d[i] = inf<int>;
+    bitset<N> st;
+    priority_queue<PII> pq;
+    d[start] = 0, pq.push({0, start});
+    while (pq.size()) {
+        int u = pq.top().se;
+        pq.pop();
+        if (st[u]) continue;
+        st[u] = 1;
+        for (auto [v, w] : g[u])
+            if (chmin(d[v], d[u] + w))
+                pq.push({-d[v], v});
+    }
+}
+
+void dfs(int u) {
+    if (u == 7) {
+        int t = 0;
+        rep(i, 5) t += dis[ord[i]][sta[ord[i + 1]]];
+        chmin(ans, t);
+    }
+    rep(i, 2, 6) {
+        if (used[i]) continue;
+        used[i] = 1, ord[u] = i;
+        dfs(u + 1);
+        used[i] = 0;
+    }
+}
 
 void solve() {
+    cin >> n >> m;
+    sta[1] = 1;
+    rep(i, 2, 6) cin >> sta[i];
+    rep(m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w), add(v, u, w);
+    }
+    rep(i, 6) dijkstra(sta[i], dis[i]);
+    ord[1] = 1;
+    dfs(2);
+    print(ans);
 }
 
 signed main() {

@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -43,6 +44,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -72,11 +75,46 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 昂贵的聘礼
+// URL: https://www.acwing.com/problem/content/905/
 // ===========================================================
+cint N = 105;
 
+int n, m;
+vpii g[N];
+int grade[N];
+int ans = inf<int>;
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+int dijkstra(int l, int r) {
+    int dis[N];
+    bitset<N> st;
+    rep(i, n) dis[i] = inf<int>;
+    priority_queue<PII> pq;
+    dis[0] = 0, pq.push({0, 0});
+    while (pq.size()) {
+        int u = pq.top().se;
+        pq.pop();
+        for (auto [v, w] : g[u])
+            if (grade[v] >= l && grade[v] <= r && chmin(dis[v], dis[u] + w))
+                pq.push({-dis[v], v});
+    }
+    return dis[1];
+}
 void solve() {
+    cin >> m >> n;
+    rep(i, n) {
+        int price, cnt;
+        cin >> price >> grade[i] >> cnt;
+        rep(cnt) {
+            int u, w;
+            cin >> u >> w;
+            add(u, i, w);
+        }
+        add(0, i, price);
+    }
+    rep(l, grade[1] - m, grade[1] + m) chmin(ans, dijkstra(l, l + m));
+    print(ans);
 }
 
 signed main() {

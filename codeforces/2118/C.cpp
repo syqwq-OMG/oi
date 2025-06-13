@@ -43,6 +43,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -70,13 +72,42 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: C. Make It Beautiful
+// URL: https://codeforces.com/contest/2118/problem/C
 // ===========================================================
+cint N = 63;
+
+ll n, k;
+ll bit[65];
 
 void solve() {
+    mset(bit, 0);
+    cin >> n >> k;
+
+    ll ans = 0;
+    rep(n) {
+        ll t;
+        cin >> t;
+        rep(i, 0, N) {
+            if (t >> i & 1) ans++;
+            else bit[i]++;
+        }
+    }
+    ll i = 0;
+    while (i <= N) {
+        ll cost = 1ll << i;
+        ll mx = cost * bit[i];
+        if (mx <= k) k -= mx, ans += bit[i];
+        else {
+            ans += k / cost;
+            break;
+        }
+        i++;
+    }
+
+    print(ans);
 }
 
 signed main() {

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <bits/stdc++.h>
 using namespace std;
 #define cint const int
@@ -43,6 +44,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -72,11 +75,41 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: P2949 [USACO09OPEN] Work Scheduling G
+// URL: https://www.luogu.com.cn/problem/P2949
 // ===========================================================
+cint N = 1e5 + 5;
+
+struct task {
+    ll d, p;
+    bool operator<(const task t) {
+        if (d != t.d) return d < t.d;
+        return p > t.p;
+    }
+};
+
+ll n;
+task a[N];
+ll sz = 0;
+ll day[N];
 
 void solve() {
+    cin >> n;
+    rep(i, n) cin >> a[i].d >> a[i].p, day[++sz] = a[i].d;
+    sort(all(a, n));
+    sort(all(day, sz));
+    sz = unique(all(day, sz)) - day - 1;
+    ll ans = 0;
+    ll i, j;
+    for (i = 1, j = 0; i <= n && j < sz; i++) {
+        ll d = day[j + 1] - day[j];
+        int k = 0;
+        while (k < d && a[i + k].d == a[i].d) ans += a[i + k].p, k++;
+        while (a[i + k].d == a[i].d) k++;
+        i = i + k - 1, j++;
+    }
+    if (i <= n) ans += a[i].p;
+    print(ans);
 }
 
 signed main() {

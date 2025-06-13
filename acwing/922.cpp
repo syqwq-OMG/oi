@@ -43,6 +43,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -72,11 +74,44 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 最优乘车
+// URL: https://www.acwing.com/problem/content/922/
 // ===========================================================
+cint N = 505, M = 105;
+
+int n, m;
+bool g[N][N];
+int dis[N];
+bitset<N> st;
+
+void bfs() {
+    queue<int> q;
+    q.push(1), dis[1] = 0;
+    while (q.size()) {
+        int t = q.front();
+        q.pop();
+        rep(i, n) if (!st[i] && g[t][i])
+            dis[i] = dis[t] + 1,
+            st[i] = 1, q.push(i);
+    }
+}
 
 void solve() {
+    cin >> m >> n;
+    string line;
+    int p;
+    getline(cin, line);
+    rep(m) {
+        vi t;
+        getline(cin, line);
+        istringstream iss(line);
+        while (iss >> p) t.push_back(p);
+        rp(i, 0, t.size()) rp(j, i + 1, t.size()) g[t[i]][t[j]] = 1;
+    }
+    rep(i, n) dis[i] = inf<int>;
+    bfs();
+    if (dis[n] == inf<int>) print("NO");
+    else print(dis[n] - 1);
 }
 
 signed main() {

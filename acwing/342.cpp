@@ -43,6 +43,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -72,11 +74,52 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 通信线路
+// URL: https://www.acwing.com/problem/content/342/
 // ===========================================================
+cint N = 1005;
+
+int n, p, k, dis[N];
+vpii g[N];
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+
+bool check(int x) {
+    rep(i, n) dis[i] = inf<int>;
+    bitset<N> st;
+    deque<int> dq;
+    dis[1] = 0, dq.push_back(1);
+    while (dq.size()) {
+        int u = dq.front();
+        dq.pop_front();
+        if (u == n) break;
+        if (st[u]) continue;
+        st[u] = 1;
+        for (auto [v, w] : g[u])
+            if (chmin(dis[v], dis[u] + (w > x))) {
+                if (w <= x) dq.push_front(v);
+                else dq.push_back(v);
+            }
+    }
+
+    return dis[n] <= k;
+}
 
 void solve() {
+    cin >> n >> p >> k;
+    rep(i, p) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w), add(v, u, w);
+    }
+    int l = 0, r = 1e6 + 1;
+    while (l < r) {
+        int mid = (l + r) >> 1;
+        if (check(mid)) r = mid;
+        else l = mid + 1;
+    }
+    if (l == 1e6 + 1) print(-1);
+    else print(l);
 }
 
 signed main() {

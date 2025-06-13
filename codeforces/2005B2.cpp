@@ -43,6 +43,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -70,13 +72,36 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: B2. The Strict Teacher (Hard Version)
+// URL: https://codeforces.com/problemset/problem/2005/B2
 // ===========================================================
+cint N = 1e5 + 5;
+
+int n, m, q, tch[N];
+
+void oho(int p) {
+    if (p < tch[1]) return print(tch[1] - 1);
+    if (p > tch[m]) return print(n - tch[m]);
+    int l = 1, r = m;
+    while (l < r) {
+        int mid = (l + r + 1) >> 1;
+        if (tch[mid] < p) l = mid;
+        else r = mid - 1;
+    }
+    print((tch[l + 1] - tch[l]) / 2);
+}
 
 void solve() {
+    cin >> n >> m >> q;
+    rep(i, m) cin >> tch[i];
+    sort(all(tch, m));
+    rep(q) {
+        int t;
+        cin >> t;
+        oho(t);
+    }
 }
 
 signed main() {

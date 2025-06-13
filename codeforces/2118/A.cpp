@@ -43,6 +43,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -70,13 +72,34 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: A. Equal Subsequences
+// URL: https://codeforces.com/contest/2118/problem/A
 // ===========================================================
 
 void solve() {
+    int n, k;
+    cin >> n >> k;
+    if (n == k) {
+        rep(k) wt(1);
+        return print();
+    }
+    if (k == 1) {
+        wt(1);
+        rep(n - 1) wt(0);
+        return print();
+    }
+    if (k == 0) {
+        rep(n) wt(0);
+        return print();
+    }
+    int t = n - k;
+    wt(1);
+    rep(t - 1) wt(0);
+    rep(k - 1) wt(1);
+    wt(0);
+    return print();
 }
 
 signed main() {

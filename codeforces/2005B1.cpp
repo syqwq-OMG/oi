@@ -43,6 +43,8 @@ constexpr double inf<double> = inf<ll>;
 #define all(x, n) x + 1, x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
+#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
+#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
@@ -70,13 +72,24 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: B1. The Strict Teacher (Easy Version)
+// URL: https://codeforces.com/problemset/problem/2005/B1
 // ===========================================================
+cint N = 10;
+
+int n, m, q, p;
+int a[N];
 
 void solve() {
+    cin >> n >> m >> q;
+    rep(i, m) cin >> a[i];
+    if (a[1] > a[2]) swap(a[1], a[2]);
+    cin >> p;
+    if (p < a[1]) return print(a[1] - 1);
+    if (p > a[2]) return print(n - a[2]);
+    print((a[2] - a[1]) / 2);
 }
 
 signed main() {
