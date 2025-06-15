@@ -72,14 +72,55 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: A + B
-// URL: https://www.acwing.com/problem/content/1/
+// Problem: 最优贸易
+// URL: https://www.acwing.com/problem/content/343/
 // ===========================================================
+cint N = 100010;
+
+int n, m, a[N];
+vi g[N], gt[N];
+int mn[N]; // mn[i]: 1 能到的所有的经过 i 这个点的所有的路径上的点的价值的最小值
+int ans = 0;
+bitset<N> st;
+
+void add(vi *graph, int u, int v) {
+    graph[u].push_back(v);
+}
+
+void spfa() {
+    queue<int> q;
+    bitset<N> inq, init;
+    q.push(1), inq[1] = 1;
+    while (q.size()) {
+        int u = q.front();
+        q.pop();
+        inq[u] = 0;
+        for (int v : g[u]) {
+            if (!init[v]) init[v] = 1, q.push(v), inq[v] = 1;
+            if (chmin(mn[v], mn[u]) && !inq[v]) q.push(v);
+        }
+    }
+}
+
+void dfs(int u) {
+    st[u] = 1;
+    chmax(ans, a[u] - mn[u]);
+    for (int v : gt[u])
+        if (!st[v]) dfs(v);
+}
 
 void solve() {
-    int a, b;
-    cin >> a >> b;
-    print(a + b);
+    cin >> n >> m;
+    rep(i, n) cin >> a[i], mn[i] = a[i];
+    rep(m) {
+        int u, v, z;
+        cin >> u >> v >> z;
+        if (z == 1) add(g, u, v), add(gt, v, u);
+        else add(g, u, v), add(g, v, u), add(gt, u, v), add(gt, v, u);
+    }
+    spfa();
+    dfs(n);
+    print(ans);
 }
 
 signed main() {

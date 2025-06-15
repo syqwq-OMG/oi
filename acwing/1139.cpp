@@ -72,14 +72,48 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: A + B
-// URL: https://www.acwing.com/problem/content/1/
+// Problem: 选择最佳线路
+// URL: https://www.acwing.com/problem/content/1139/
 // ===========================================================
+cint N = 1005;
+
+int n, m, home, w;
+
+int dij(vpii *g, int start) {
+    int dis[N];
+    bitset<N> st;
+    rep(i, 0, n) dis[i] = inf<int>;
+    priority_queue<PII> pq;
+    dis[start] = 0, pq.push({0, start});
+    while (pq.size()) {
+        int u = pq.top().se;
+        pq.pop();
+        if (st[u]) continue;
+        st[u] = 1;
+        for (auto [v, w] : g[u])
+            if (chmin(dis[v], dis[u] + w)) pq.push({-dis[v], v});
+    }
+    if (dis[home] == inf<int>) return -1;
+    else return dis[home];
+}
 
 void solve() {
-    int a, b;
-    cin >> a >> b;
-    print(a + b);
+    while (cin >> n >> m >> home) {
+        vpii g[N];
+        auto add = [&g](int u, int v, int w) { g[u].push_back({v, w}); };
+        rep(m) {
+            int u, v, w;
+            cin >> u >> v >> w;
+            add(u, v, w);
+        }
+        cin >> w;
+        rep(w) {
+            int t;
+            cin >> t;
+            add(0, t, 0);
+        }
+        print(dij(g, 0));
+    }
 }
 
 signed main() {

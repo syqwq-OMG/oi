@@ -72,14 +72,78 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: A + B
-// URL: https://www.acwing.com/problem/content/1/
+// Problem: 道路与航线
+// URL: https://www.acwing.com/problem/content/344/
 // ===========================================================
+cint N = 25005, M = 5e4 + 5;
+
+int n, mr, mw, S, bcnt, id[N], dis[N], in[N];
+vi block[N];
+vpii g[N];
+queue<int> q;
+bitset<N> st;
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+
+void dfs(int u, int bid) {
+    id[u] = bid;
+    block[bid].push_back(u);
+    for (auto [v, _] : g[u])
+        if (!id[v]) dfs(v, bid);
+}
+
+void dijkstra(int bid) {
+    priority_queue<PII> pq;
+    for (auto x : block[bid]) pq.push({-dis[x], x});
+    while (pq.size()) {
+        int u = pq.top().se;
+        pq.pop();
+        if (st[u]) continue;
+        st[u] = 1;
+        for (auto [v, w] : g[u]) {
+            if (chmin(dis[v], dis[u] + w)) {
+                if (id[u] == id[v]) pq.push({-dis[v], v});
+            }
+            if (id[u] != id[v] && --in[id[v]] == 0) q.push(id[v]);
+        }
+    }
+}
+
+void topsort() {
+    rep(i, bcnt) if (!in[i]) q.push(i);
+    while (q.size()) {
+        int t = q.front();
+        q.pop();
+        dijkstra(t);
+    }
+}
 
 void solve() {
-    int a, b;
-    cin >> a >> b;
-    print(a + b);
+    cin >> n >> mr >> mw >> S;
+
+    rep(i, n) dis[i] = inf<int>;
+    dis[S] = 0;
+
+    rep(mr) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w), add(v, u, w);
+    }
+
+    rep(i, n) if (!id[i]) dfs(i, ++bcnt);
+
+    rep(mw) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w), in[id[v]]++;
+    }
+
+    topsort();
+
+    rep(i, n) {
+        if (dis[i] > inf<int> / 2) print("NO PATH");
+        else print(dis[i]);
+    }
 }
 
 signed main() {

@@ -1,0 +1,41 @@
+用来记录一下用过的变量名字，以防不知道用啥命名
+
+g gt graph
+st vis used 
+dij dijkstra
+spfa
+floyd
+bound l r mid chk check
+dis dist 
+block bcnt bid id 联通块里面的点 联通块数量 每个点所在的联通块
+sum del pre suf 前缀后缀相关信息
+delta 
+cnt res ans ret tot
+stk que
+inq inque 是否在队列里面
+oho foo doo 很喜欢 oho
+prework init
+operate change extend
+in out deg dint dout 出度 入度
+dict sz dicrete 离散化
+query add fa get find merge ask
+len length
+dest depart sx sy 起点终点
+son root size 子树大小 根
+topsort
+add sub mul div inv mod qpow qmi fact lucas C gauss gcd exgcd 
+eular primes phi 线性筛 素数预处理 欧拉函数 
+lowbit ones 数字中一的个数
+lg 预处理2为底的对数
+idx index ind 
+nxt prv mn mx
+hh tt 
+cow farm
+pos group
+row col cell
+table cable 
+mins minv 
+seq sequence 
+opposite center path
+dep depth
+build

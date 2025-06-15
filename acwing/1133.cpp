@@ -72,14 +72,76 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: A + B
-// URL: https://www.acwing.com/problem/content/1/
+// Problem: 拯救大兵瑞恩
+// URL: https://www.acwing.com/problem/content/1133/
 // ===========================================================
+cint N = 11, M = N * N, P = 10;
+
+int n, m, p, k;
+vpii g[M];
+int id[N][N], key[M], dis[M][1 << P];
+set<PII> wall;
+bool st[M][1 << P];
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+
+void build() {
+    auto check = [](int x, int y) { return 1 <= x && x <= n && y >= 1 && y <= m; };
+    int dx[] = {-1, 1, 0, 0}, dy[] = {0, 0, -1, 1};
+    rep(i, 1, n) rep(j, 1, m) rep(d, 0, 3) {
+        int x = i + dx[d], y = j + dy[d];
+        if (!check(x, y)) continue;
+        int a = id[i][j], b = id[x][y];
+        if (wall.count({a, b}) == 0) add(a, b, 0);
+    }
+}
+
+int bfs() {
+    auto has = [](int state, int kid) { return state >> (kid - 1) & 1; };
+    mset(dis, 0x3f);
+    deque<PII> q;
+    dis[1][0] = 0, q.push_back({1, 0});
+    while (q.size()) {
+        auto [u, state] = q.front();
+        q.pop_front();
+
+        if (u == n * m) return dis[u][state];
+        if (st[u][state]) continue;
+        st[u][state] = 1;
+
+        if (key[u]) {
+            int t = state | key[u];
+            if (chmin(dis[u][t], dis[u][state])) q.push_front({u, t});
+        }
+
+        for (auto [v, kind] : g[u]) {
+            if (kind && !has(state, kind)) continue;
+            if (chmin(dis[v][state], dis[u][state] + 1)) q.push_back({v, state});
+        }
+    }
+
+    return -1;
+}
 
 void solve() {
-    int a, b;
-    cin >> a >> b;
-    print(a + b);
+    cin >> n >> m >> p >> k;
+    for (int i = 1, t = 1; i <= n; i++) rep(j, 1, m) id[i][j] = t++;
+    rep(k) {
+        int x1, x2, y1, y2, w;
+        cin >> x1 >> y1 >> x2 >> y2 >> w;
+        int u = id[x1][y1], v = id[x2][y2];
+        wall.insert({u, v}), wall.insert({v, u});
+        if (w) add(u, v, w), add(v, u, w);
+    }
+    build();
+    int s;
+    cin >> s;
+    rep(s) {
+        int x, y, z;
+        cin >> x >> y >> z;
+        key[id[x][y]] |= 1 << (z - 1);
+    }
+    print(bfs());
 }
 
 signed main() {

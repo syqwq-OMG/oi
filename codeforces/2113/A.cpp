@@ -70,16 +70,42 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: A + B
-// URL: https://www.acwing.com/problem/content/1/
+// Problem: A. Shashliks
+// URL: https://codeforces.com/contest/2113/problem/A
 // ===========================================================
+int oho(int tp, int mn, int d) {
+    if (tp < mn) return 0;
+    int dt = tp - mn;
+    return dt / d + 1;
+}
 
 void solve() {
-    int a, b;
-    cin >> a >> b;
-    print(a + b);
+    int k, x, y, a, b;
+    cin >> k >> a >> x >> b >> y;
+
+    int ans = 0;
+    // over
+    if (k < min(a, x)) return print(0);
+    // use 1 type
+    chmax(ans, oho(k, a, b));
+    chmax(ans, oho(k, x, y));
+
+    // use 2 type
+    if (a > x) swap(a, x), swap(b, y);
+
+    int cnt = oho(k, x, y);
+    int kk = k - cnt * y;
+    cnt += max(0, oho(kk, a, b));
+    chmax(ans, cnt);
+
+    cnt = oho(k, a, b);
+    kk = k - cnt * b;
+    cnt += max(0, oho(kk, x, y));
+    chmax(ans, cnt);
+
+    print(ans);
 }
 
 signed main() {
