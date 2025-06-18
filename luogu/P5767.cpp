@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <sstream>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -41,20 +42,15 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
-#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
-#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
-#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
 void wt(const T _x) { cout << _x; }
 template <>
-void wt(const PII _x) { cout << _x.fi << " " << _x.se << " "; }
+void wt(const PII _x) { cout << _x.fi << " " << _x.se; }
 void print() { cout << endl; }
-template <class T>
-void print(const T _x) { wt(_x), print(); }
 template <class Head, class... Tail>
 void print(Head &&head, Tail &&...tail) {
     wt(head);
@@ -62,17 +58,11 @@ void print(Head &&head, Tail &&...tail) {
     print(std::forward<Tail>(tail)...);
 }
 template <class T>
-void arprint(const T *_arr, int _l, int _r) {
+void aprint(const T *_arr, int _l, int _r) {
     if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
 ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
-ll qmi(ll _x, ll _y, ll _mod) {
-    ll _res = 1;
-    for (ll _t = _x; _y; _y >>= 1, _t = _t * _t % _mod)
-        if (_y & 1) _res = _res * _t % _mod;
-    return _res;
-}
 void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
 void NO(bool t = 1) { YES(!t); }
 void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
@@ -83,50 +73,46 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: 山峰和山谷
-// URL: https://www.acwing.com/problem/content/1108/
+// Problem: P5767 [NOI1997] 最优乘车
+// URL: https://www.luogu.com.cn/problem/P5767
 // ===========================================================
-cint N = 1005;
-cint dx[] = {-1, 1, 0, 0, -1, -1, 1, 1};
-cint dy[] = {0, 0, -1, 1, 1, -1, 1, -1};
+cint N = 505, M = 105;
 
-int n;
-int a[N][N];
-bool st[N][N];
-
-bool check(int x, int y) { return 1 <= x && x <= n && 1 <= y && y <= n; }
-
-pair<bool, bool> bfs(int sx, int sy) {
-    if (st[sx][sy]) return {0, 0};
-    bool hi = 1, lo = 1;
-    queue<PII> q;
-    q.push({sx, sy}), st[sx][sy] = 1;
+int n, m;
+vi g[N];
+bitset<N> st;
+int dis[N];
+void add(int u, int v) { g[u].push_back(v); }
+int bfs() {
+    dis[1] = 0, st[1] = 1;
+    queue<int> q;
+    q.push(1);
     while (q.size()) {
-        auto [x, y] = q.front();
+        int u = q.front();
         q.pop();
-        rep(i, 0, 7) {
-            int xx = x + dx[i], yy = y + dy[i];
-            if (!check(xx, yy)) continue;
-            if (st[xx][yy] && a[xx][yy] == a[x][y]) continue;
-
-            if (a[xx][yy] == a[x][y]) st[xx][yy] = 1, q.push({xx, yy});
-            elif (a[xx][yy] > a[x][y]) hi = 0;
-            else lo = 0;
+        if (u == n) return dis[n] - 1;
+        for (auto v : g[u]) {
+            if (st[v]) continue;
+            st[v] = 1, dis[v] = dis[u] + 1, q.push(v);
         }
     }
-    return {hi, lo};
+    return -1;
 }
-
 void solve() {
-    cin >> n;
-    rep(i, n) rep(j, n) cin >> a[i][j];
-
-    int qwq = 0, awa = 0;
-    rep(i, n) rep(j, n) {
-        auto [h, l] = bfs(i, j);
-        qwq += l, awa += h;
+    cin >> m >> n;
+    string line;
+    int t;
+    getline(cin, line);
+    rep(m) {
+        vi ver;
+        getline(cin, line);
+        istringstream iss(line);
+        while (iss >> t) ver.push_back(t);
+        rp(i, 0, ver.size()) rp(j, i + 1, ver.size()) add(ver[i], ver[j]);
     }
-    print(awa, qwq);
+    t = bfs();
+    if (t == -1) NO();
+    else print(t);
 }
 
 signed main() {

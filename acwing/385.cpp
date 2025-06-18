@@ -41,20 +41,15 @@ constexpr double inf<double> = inf<ll>;
 #define mset(f, z) memset(f, z, sizeof(f))
 #define elif else if
 #define all(x, n) x + 1, x + 1 + n
-#define edd(x, n) x + 1 + n
 #define MIN(v, n) *min_element(all(v, n))
 #define MAX(v, n) *max_element(all(v, n))
-#define LB(c, n, x) distance(c, lower_bound(all(c, n), (x)))
-#define UB(c, n, x) distance(c, upper_bound(all(c, n), (x)))
 auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
 auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
 template <class T>
 void wt(const T _x) { cout << _x; }
 template <>
-void wt(const PII _x) { cout << _x.fi << " " << _x.se << " "; }
+void wt(const PII _x) { cout << _x.fi << " " << _x.se; }
 void print() { cout << endl; }
-template <class T>
-void print(const T _x) { wt(_x), print(); }
 template <class Head, class... Tail>
 void print(Head &&head, Tail &&...tail) {
     wt(head);
@@ -62,17 +57,11 @@ void print(Head &&head, Tail &&...tail) {
     print(std::forward<Tail>(tail)...);
 }
 template <class T>
-void arprint(const T *_arr, int _l, int _r) {
+void aprint(const T *_arr, int _l, int _r) {
     if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
     else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
 }
 ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
-ll qmi(ll _x, ll _y, ll _mod) {
-    ll _res = 1;
-    for (ll _t = _x; _y; _y >>= 1, _t = _t * _t % _mod)
-        if (_y & 1) _res = _res * _t % _mod;
-    return _res;
-}
 void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
 void NO(bool t = 1) { YES(!t); }
 void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
@@ -81,52 +70,61 @@ void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
 // #define int long long
-// #define CF
+#define CF
 // ===========================================================
-// Problem: 山峰和山谷
-// URL: https://www.acwing.com/problem/content/1108/
+// Problem: 观光
+// URL: https://www.acwing.com/problem/content/385/
 // ===========================================================
 cint N = 1005;
-cint dx[] = {-1, 1, 0, 0, -1, -1, 1, 1};
-cint dy[] = {0, 0, -1, 1, 1, -1, 1, -1};
 
-int n;
-int a[N][N];
-bool st[N][N];
+struct node {
+    int ver, type, dist;
+    node(int ver, int type, int dist) : ver(ver), type(type), dist(dist) {}
+    bool operator<(const node p) const { return dist > p.dist; }
+};
 
-bool check(int x, int y) { return 1 <= x && x <= n && 1 <= y && y <= n; }
+int n, m, S, F;
 
-pair<bool, bool> bfs(int sx, int sy) {
-    if (st[sx][sy]) return {0, 0};
-    bool hi = 1, lo = 1;
-    queue<PII> q;
-    q.push({sx, sy}), st[sx][sy] = 1;
-    while (q.size()) {
-        auto [x, y] = q.front();
-        q.pop();
-        rep(i, 0, 7) {
-            int xx = x + dx[i], yy = y + dy[i];
-            if (!check(xx, yy)) continue;
-            if (st[xx][yy] && a[xx][yy] == a[x][y]) continue;
+int dij(vpii *g) {
+    bool st[N][2];
+    int dis[N][2], cnt[N][2];
+    priority_queue<node> pq;
+    mset(dis, 0x3f), mset(st, 0), mset(cnt, 0);
 
-            if (a[xx][yy] == a[x][y]) st[xx][yy] = 1, q.push({xx, yy});
-            elif (a[xx][yy] > a[x][y]) hi = 0;
-            else lo = 0;
+    dis[S][0] = 0, cnt[S][0] = 1, pq.push(node(S, 0, 0));
+    while (pq.size()) {
+        auto [u, t, d] = pq.top();
+        pq.pop();
+        if (st[u][t]) continue;
+        st[u][t] = 1;
+        for (auto [v, w] : g[u]) {
+            if (dis[v][0] > d + w) {
+                dis[v][1] = dis[v][0], cnt[v][1] = cnt[v][0],
+                dis[v][0] = d + w, cnt[v][0] = cnt[u][t];
+                pq.push(node(v, 0, dis[v][0])), pq.push(node(v, 1, dis[v][1]));
+            }
+            elif (dis[v][0] == d + w) cnt[v][0] += cnt[u][t];
+            elif (dis[v][1] > d + w) dis[v][1] = d + w, cnt[v][1] = cnt[u][t], pq.push(node(v, 1, dis[v][1]));
+            elif (dis[v][1] == d + w) cnt[v][1] += cnt[u][t];
         }
     }
-    return {hi, lo};
+
+    int res = cnt[F][0];
+    if (dis[F][1] == dis[F][0] + 1) res += cnt[F][1];
+    return res;
 }
 
 void solve() {
-    cin >> n;
-    rep(i, n) rep(j, n) cin >> a[i][j];
-
-    int qwq = 0, awa = 0;
-    rep(i, n) rep(j, n) {
-        auto [h, l] = bfs(i, j);
-        qwq += l, awa += h;
+    cin >> n >> m;
+    vpii g[N];
+    auto add = [&g](int u, int v, int w) { g[u].push_back({v, w}); };
+    rep(m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w);
     }
-    print(awa, qwq);
+    cin >> S >> F;
+    print(dij(g));
 }
 
 signed main() {
