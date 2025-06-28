@@ -72,71 +72,37 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: 排序
-// URL: https://www.acwing.com/problem/content/345/
+// Problem: 最短网络
+// URL: https://www.acwing.com/problem/content/1142/
 // ===========================================================
-cint N = 26;
+cint N = 105;
 
-int n, m;
-bool g[N][N], d[N][N];
-bool st[N];
+ll n;
+ll g[N][N], dis[N];
+bitset<N> st;
 
-void floyd() {
-    rp(i, 0, n) rp(j, 0, n) d[i][j] = g[i][j];
-    rp(k, 0, n) rp(i, 0, n) rp(j, 0, n) d[i][j] |= d[i][k] & d[k][j];
-}
-
-int check() {
-    rp(i, 0, n) if (d[i][i]) return 2;
-    rp(i, 0, n) rp(j, 0, i) if (!d[i][j] && !d[j][i]) return 0;
-    return 1;
-}
-
-char get_min() {
-    rp(i, 0, n) {
-        if (st[i]) continue;
-        bool flg = 1;
-        rp(j, 0, n) {
-            if (!st[j] && d[j][i]) {
-                flg = 0;
-                break;
-            }
+ll prim() {
+    rep(i, n) dis[i] = inf<ll>;
+    ll ans = 0ll;
+    dis[1] = 0;
+    rep(n) {
+        ll t = -1;
+        rep(i, n) {
+            if (st[i]) continue;
+            if (t == -1 || dis[i] < dis[t]) t = i;
         }
-        if (flg) {
-            st[i] = 1;
-            return 'A' + i;
+        ans += dis[t], st[t] = 1;
+        rep(i, n) {
+            if (st[i]) continue;
+            chmin(dis[i], g[i][t]);
         }
     }
-    return '0';
+    return ans;
 }
-
-void oho() {
-    mset(g, 0), mset(d, 0);
-    int type = 0, rd;
-    char c[5];
-    rep(i, m) {
-        cin >> c;
-        int a = c[0] - 'A', b = c[2] - 'A';
-        if (!type) {
-            g[a][b] = d[a][b] = 1;
-            // floyd();
-            // u->a->b->v
-            rp(u, 0, n) d[u][b] |= d[u][a], d[a][u] |= d[b][u];
-            rp(u, 0, n) rp(v, 0, n) d[u][v] |= d[u][a] & d[b][v];
-            type = check();
-            if (type) rd = i;
-        }
-    }
-    if (!type) return print("Sorted sequence cannot be determined.");
-    if (type == 2) return print("Inconsistency found after", rd, "relations.");
-    mset(st, 0);
-    cout << "Sorted sequence determined after " << rd << " relations: ";
-    rep(n) wt(get_min());
-    print(".");
-}
-
 void solve() {
-    while (cin >> n >> m, n || m) oho();
+    cin >> n;
+    rep(i, n) rep(j, n) cin >> g[i][j];
+    print(prim());
 }
 
 signed main() {

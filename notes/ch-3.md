@@ -14,8 +14,18 @@
   - $O(n^{3})$ 求出任意两点最短路径
   - 求传递闭包
   - 找最小环
-  - 恰好经过k条边的最短路（倍增）
-
+  - 恰好经过k条边的最短路（倍增·快速幂·邻接矩阵乘法）
+  - 一定要理解floyd本质是有dp的成分在里面的，所以遇到的题目也可以考虑floyd的本来的推导，提供思路。
+#### 最小生成树
+- **任意一棵最小生成树一定包含无向图中权值最小的边**。
+证明：假设不包含最小的边，那么在树中加上这条边会构成一个环，此时，用最小边替换环上任意一条边，都可以得到更优解，矛盾。所以一定包含最小的边
+- prim算法
+  - 朴素版本（邻接矩阵） $O(n^{2})$
+  - 维护一个已经在mst中的集合，每次贪心加入**到这个集合距离最短的点**。
+  - 堆优化版本
+- kruskal算法 
+  - 直接存边
+  - 时间复杂度 $O(m\log m)$
 ### 水题 awa
 #### [1129. 热浪](https://www.acwing.com/problem/content/1131/)
 ##### 思路
@@ -770,3 +780,348 @@ void solve() {
 }
 ```
 
+#### [343. 排序](https://www.acwing.com/problem/content/345/)
+##### 思路
+floyd进行传递闭包，每次传入一个新关系的时候，跑一次，看看是否可以确定或者是矛盾，输出最后偏序关系的时候只要每次在没选过的元素找到最小值即可。时间复杂度 $O(n^{3}m)$
+
+但是注意到，每次更新新的关系的时候，只需要更新这条边会影响到的关系，所以每次可以枚举可能会影响到的关系，整体时间复杂度可以降为 $O(n^{2}m)$
+##### 蒟蒻代码
+``` cpp
+cint N = 26;
+
+int n, m;
+bool g[N][N], d[N][N];
+bool st[N];
+
+void floyd() {
+    rp(i, 0, n) rp(j, 0, n) d[i][j] = g[i][j];
+    rp(k, 0, n) rp(i, 0, n) rp(j, 0, n) d[i][j] |= d[i][k] & d[k][j];
+}
+
+int check() {
+    rp(i, 0, n) if (d[i][i]) return 2;
+    rp(i, 0, n) rp(j, 0, i) if (!d[i][j] && !d[j][i]) return 0;
+    return 1;
+}
+
+char get_min() {
+    rp(i, 0, n) {
+        if (st[i]) continue;
+        bool flg = 1;
+        rp(j, 0, n) {
+            if (!st[j] && d[j][i]) {
+                flg = 0;
+                break;
+            }
+        }
+        if (flg) {
+            st[i] = 1;
+            return 'A' + i;
+        }
+    }
+    return '0';
+}
+
+void oho() {
+    mset(g, 0), mset(d, 0);
+    int type = 0, rd;
+    char c[5];
+    rep(i, m) {
+        cin >> c;
+        int a = c[0] - 'A', b = c[2] - 'A';
+        if (!type) {
+            g[a][b] = d[a][b] = 1;
+            // floyd();
+            // u->a->b->v
+            rp(u, 0, n) d[u][b] |= d[u][a], d[a][u] |= d[b][u];
+            rp(u, 0, n) rp(v, 0, n) d[u][v] |= d[u][a] & d[b][v];
+            type = check();
+            if (type) rd = i;
+        }
+    }
+    if (!type) return print("Sorted sequence cannot be determined.");
+    if (type == 2) return print("Inconsistency found after", rd, "relations.");
+    mset(st, 0);
+    cout << "Sorted sequence determined after " << rd << " relations: ";
+    rep(n) wt(get_min());
+    print(".");
+}
+
+void solve() {
+    while (cin >> n >> m, n || m) oho();
+}
+```
+
+#### [344. 观光之旅](https://www.acwing.com/problem/content/346/)
+##### 思路
+因为所有的边都是正的，所以不会考虑有重复节点的情况，因为一定不是最优的。
+因为也是最优化问题，所以也考虑使用集合划分的思想。考虑**按照环上编号最大的点的编号（也就是不超过k）来分类**，然后最后的答案就是环上最大点不超过n的答案。
+floyd中 $d[i,j]$ 表示 **经过的最大点**（就是路径中的不包括端点的点集）不超过 k 的时候，i j之间的最短路径，那么我们在求最小环的第k个阶段的时候，可以枚举任意两个点，和k构成的环，环的大小也就是 $w[i,k]+w[k,j]+d[i,j]$，因为d中在没更新之前，存储的实际上是 $d[k-1,i,j]$ 。
+最后，为了输出路径，我们可以考虑用一个pos数组，在进行relax操作的时候，记录中间转移的节点的编号，也就是两点中间的最短路径中经过的最大节点的编号，由于考虑到这个pos中两段部分可能还有中间点，所以在输出路径的时候只要递归操作就行。
+##### 蒟蒻代码
+``` cpp
+cint N = 105;
+
+int n, m;
+ll g[N][N], d[N][N], pos[N][N];
+ll ans = inf<ll>;
+vi path;
+
+void get(ll u, ll v) {
+    ll t = pos[u][v];
+    if (!t) return;
+    get(u, t), path.push_back(t), get(t, v);
+}
+void floyd() {
+    rep(k, n) {
+        rep(i, k - 1) rep(j, i + 1, k - 1) {
+            if (chmin(ans, d[i][j] + g[i][k] + g[k][j])) {
+                path.clear();
+                path.push_back(i), get(i, j), path.push_back(j), path.push_back(k);
+            }
+        }
+        rep(i, n) rep(j, n) if (chmin(d[i][j], d[i][k] + d[k][j])) pos[i][j] = k;
+    }
+}                  
+void solve() {
+    cin >> n >> m;
+    rep(i, n) rep(j, n) d[i][j] = g[i][j] = inf<ll>;
+    rep(m) {
+        ll u, v, w;
+        cin >> u >> v >> w;
+        chmin(g[u][v], w);
+        g[v][u] = d[u][v] = d[v][u] = g[u][v];
+    }
+    floyd();
+    if (ans == inf<ll>) print("No solution.");
+    for (auto x : path) cout << x << " ";
+}
+```
+#### [345. 牛站](https://www.acwing.com/problem/content/347/)
+##### 思路
+在floyd算法中，$d[k,i,j]$表示点是从i到j，中间只经过1～k的最短距离。在此题中考虑，$d[k,i,j]$表示i到j经过恰好k条边到最短距离，于是很容易得到 $d[a+b,i,j]=\min \{ d[a,i,k]+d[b,k,j] \}$，而我们求的就是 $d[N,S,E]$，于是这是另一种floyd的变体。而我们考虑对于刚好经过k条边两点的最短距离实际上可以通过邻接矩阵的幂来表示，并且对于最短路径，前面与后面是完全独立的，所以可以考虑使用快速幂，然后用二进制拼接的方法来得到最终的答案。这种方法的时间复杂度是 $O(n^{3}\log N)$，并且可以处理有负环的情况，因为限制了最多经过的边的条数。
+做快速幂的时候，res中存的应该是单位元，在这里就是经过0条边的dis。但是g种一开始存的应该是经过1条边的dis，所以对角线不应该初始化成0.
+##### 蒟蒻代码
+``` cpp
+cint N = 205;
+
+ll n, m, k, S, E;
+ll g[N][N], res[N][N];
+unordered_map<ll, ll> mp;
+
+void mul(ll C[][N], ll A[][N], ll B[][N]) {
+    static ll tmp[N][N];
+    mset(tmp, 0x3f);
+    rep(i, n) rep(j, n) rep(k, n) chmin(tmp[i][j], A[i][k] + B[k][j]);
+    memcpy(C, tmp, sizeof tmp);
+}
+
+void qmi() {
+    mset(res, 0x3f);
+    rep(i, 200) res[i][i] = 0;
+    while (k) {
+        if (k & 1) mul(res, res, g);
+        mul(g, g, g), k >>= 1;
+    }
+}
+
+void solve() {
+    mset(g, 0x3f);
+    cin >> k >> m >> S >> E;
+    if (!mp.count(S)) mp[S] = ++n;
+    if (!mp.count(E)) mp[E] = ++n;
+    S = mp[S], E = mp[E];
+    rep(m) {
+        ll u, v, w;
+        cin >> w >> u >> v;
+        if (!mp.count(u)) mp[u] = ++n;
+        if (!mp.count(v)) mp[v] = ++n;
+        u = mp[u], v = mp[v];
+        g[u][v] = g[v][u] = min(g[u][v], w);
+    }
+    qmi();
+    print(res[S][E]);
+}
+```
+#### [1140. 最短网络](https://www.acwing.com/problem/content/1142/)
+##### 思路
+最小生成树prim模版：维护一个已经在mst中的集合，每次贪心加入距离这个集合距离最短的点。
+##### 蒟蒻代码
+``` cpp
+cint N = 105;
+
+ll n;
+ll g[N][N], dis[N];
+bitset<N> st;
+
+ll prim() {
+    rep(i, n) dis[i] = inf<ll>;
+    ll ans = 0ll;
+    dis[1] = 0;
+    rep(n) {
+        ll t = -1;
+        rep(i, n) {
+            if (st[i]) continue;
+            if (t == -1 || dis[i] < dis[t]) t = i;
+        }
+        ans += dis[t], st[t] = 1;
+        rep(i, n) {
+            if (st[i]) continue;
+            chmin(dis[i], g[i][t]);
+        }
+    }
+    return ans;
+}
+void solve() {
+    cin >> n;
+    rep(i, n) rep(j, n) cin >> g[i][j];
+    print(prim());
+}
+```
+#### [1141. 局域网](https://www.acwing.com/problem/content/1143/)
+##### 思路
+在每个联通块内部求mst，使用kruskal算法就行。
+##### 蒟蒻代码
+``` cpp
+struct rec {
+    int u, v, w;
+};
+cint N = 105, M = 205;
+int n, m;
+int sum = 0, mst = 0;
+int fa[N];
+rec edge[M];
+int get(int x) { return fa[x] == x ? x : fa[x] = get(fa[x]); }
+void merge(int x, int y) { fa[get(x)] = get(y); }
+void solve() {
+    cin >> n >> m;
+    rep(i, n) fa[i] = i;
+    rep(i, m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        sum += w, edge[i] = {u, v, w};
+    }
+    sort(all(edge, m), [](auto x, auto y) {
+        return x.w < y.w;
+    });
+    rep(i, m) {
+        auto [u, v, w] = edge[i];
+        int x = get(u), y = get(v);
+        if (x == y) continue;
+        mst += w, merge(x, y);
+    }
+    print(sum - mst);
+}
+```
+#### [1142. 繁忙的都市](https://www.acwing.com/problem/content/description/1144/)
+##### 思路
+可以使用二分，也可以直接使用kruskal。因为按照边权大小进行排序，那么，如果两点没有联通，按照贪心选出来的这条边一定不会更劣，因为如果这条边没有选出来，那么最后可以把这条边加上，构成一个环，对于环上任意一条边，用它替换，一定是更优解，因为仍然是一棵树。矛盾，所以贪心的策略是正确的。
+##### 蒟蒻代码
+``` cpp
+struct rec {
+    int u, v, w;
+};
+cint N = 305, M = 8005;
+
+int n, m;
+int fa[N];
+rec edge[M];
+
+int get(int x) { return fa[x] == x ? x : fa[x] = get(fa[x]); }
+void merge(int x, int y) { fa[get(x)] = get(y); }
+void solve() {
+    cin >> n >> m;
+    rep(i, n) fa[i] = i;
+    rep(i, m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        edge[i] = {u, v, w};
+    }
+    int ans = 0;
+    sort(all(edge, m), [](auto x, auto y) { return x.w < y.w; });
+    rep(i, m) {
+        auto [u, v, w] = edge[i];
+        int x = get(u), y = get(v);
+        if (x == y) continue;
+        chmax(ans, w), merge(x, y);
+    }
+    print(n - 1, ans);
+}
+```
+#### [1143. 联络员](https://www.acwing.com/problem/content/1145/)
+##### 思路
+必须要用的边直接加到mst中（缩点），剩下的继续kruskal
+##### 蒟蒻代码
+``` cpp
+struct vec {
+    int u, v, w;
+};
+cint N = 2005, M = 10005;
+
+int n, m;
+int fa[N];
+int cnt = 0, ans = 0;
+vec edge[M];
+int get(int x) { return fa[x] == x ? x : fa[x] = get(fa[x]); }
+void merge(int x, int y) { fa[get(x)] = get(y); }
+void solve() {
+    cin >> n >> m;
+    rep(i, n) fa[i] = i;
+    rep(m) {
+        int p, u, v, w;
+        cin >> p >> u >> v >> w;
+        if (p == 1) {
+            ans += w;
+            merge(u, v);
+        } else {
+            edge[++cnt] = {u, v, w};
+        }
+    }
+    sort(all(edge, cnt), [](auto x, auto y) { return x.w < y.w; });
+    rep(i, cnt) {
+        auto [u, v, w] = edge[i];
+        int x = get(u), y = get(v);
+        if (x != y) ans += w, merge(x, y);
+    }
+    print(ans);
+}
+```
+#### [1144. 连接格点](https://www.acwing.com/problem/content/1146/)
+##### 思路
+每个格点看成一个点，然后手动建图即可，已经联通的点既可以直接放到一个并查集里面，也可以设为边权为0的边。注意因为边权都是正的，所以才是最小生成树，如果边权可以是负的，不一定是最小生成树，比如所有边权都为负的完全图。
+##### 蒟蒻代码
+``` cpp
+struct vec {
+    int u, v, w;
+};
+cint N = 1005, M = N * N;
+
+int n, m, ans;
+int cnt;
+int fa[M];
+vec edge[M << 2];
+int dx[] = {-1, 1, 0, 0}, dy[] = {0, 0, -1, 1};
+
+int pos(int x, int y) { return (x - 1) * m + y; }
+bool valid(int x, int y) { return 1 <= x && x <= n && 1 <= y && y <= m; }
+int get(int x) { return fa[x] == x ? x : fa[x] = get(fa[x]); }
+void merge(int x, int y) { fa[get(x)] = get(y); }
+void solve() {
+    cin >> n >> m;
+    rep(i, n * m) fa[i] = i;
+    int x1, x2, y1, y2;
+    while (cin >> x1 >> y1 >> x2 >> y2) edge[++cnt] = {pos(x1, y1), pos(x2, y2), 0};
+    rep(i, n) rep(j, m) rep(k, 0, 3) {
+        int x = i + dx[k], y = j + dy[k];
+        int p1 = pos(i, j), p2 = pos(x, y);
+        if (valid(x, y)) edge[++cnt] = {p1, p2, dx[k] ? 1 : 2};
+    }
+    sort(all(edge, cnt), [](auto x, auto y) { return x.w < y.w; });
+    rep(i, cnt) {
+        auto [u, v, w] = edge[i];
+        int x = get(u), y = get(v);
+        if (x != y) ans += w, merge(x, y);
+    }
+    print(ans);
+}
+```

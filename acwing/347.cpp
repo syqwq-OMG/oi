@@ -1,4 +1,6 @@
 #include <bits/stdc++.h>
+#include <cstring>
+#include <unordered_map>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -72,71 +74,47 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: 排序
-// URL: https://www.acwing.com/problem/content/345/
+// Problem: 牛站
+// URL: https://www.acwing.com/problem/content/347/
 // ===========================================================
-cint N = 26;
+cint N = 205;
 
-int n, m;
-bool g[N][N], d[N][N];
-bool st[N];
+ll n, m, k, S, E;
+ll g[N][N], res[N][N];
+unordered_map<ll, ll> mp;
 
-void floyd() {
-    rp(i, 0, n) rp(j, 0, n) d[i][j] = g[i][j];
-    rp(k, 0, n) rp(i, 0, n) rp(j, 0, n) d[i][j] |= d[i][k] & d[k][j];
+void mul(ll C[][N], ll A[][N], ll B[][N]) {
+    static ll tmp[N][N];
+    mset(tmp, 0x3f);
+    rep(i, n) rep(j, n) rep(k, n) chmin(tmp[i][j], A[i][k] + B[k][j]);
+    memcpy(C, tmp, sizeof tmp);
 }
 
-int check() {
-    rp(i, 0, n) if (d[i][i]) return 2;
-    rp(i, 0, n) rp(j, 0, i) if (!d[i][j] && !d[j][i]) return 0;
-    return 1;
-}
-
-char get_min() {
-    rp(i, 0, n) {
-        if (st[i]) continue;
-        bool flg = 1;
-        rp(j, 0, n) {
-            if (!st[j] && d[j][i]) {
-                flg = 0;
-                break;
-            }
-        }
-        if (flg) {
-            st[i] = 1;
-            return 'A' + i;
-        }
+void qmi() {
+    mset(res, 0x3f);
+    rep(i, 200) res[i][i] = 0;
+    while (k) {
+        if (k & 1) mul(res, res, g);
+        mul(g, g, g), k >>= 1;
     }
-    return '0';
-}
-
-void oho() {
-    mset(g, 0), mset(d, 0);
-    int type = 0, rd;
-    char c[5];
-    rep(i, m) {
-        cin >> c;
-        int a = c[0] - 'A', b = c[2] - 'A';
-        if (!type) {
-            g[a][b] = d[a][b] = 1;
-            // floyd();
-            // u->a->b->v
-            rp(u, 0, n) d[u][b] |= d[u][a], d[a][u] |= d[b][u];
-            rp(u, 0, n) rp(v, 0, n) d[u][v] |= d[u][a] & d[b][v];
-            type = check();
-            if (type) rd = i;
-        }
-    }
-    if (!type) return print("Sorted sequence cannot be determined.");
-    if (type == 2) return print("Inconsistency found after", rd, "relations.");
-    mset(st, 0);
-    cout << "Sorted sequence determined after " << rd << " relations: ";
-    rep(n) wt(get_min());
-    print(".");
 }
 
 void solve() {
-    while (cin >> n >> m, n || m) oho();
+    mset(g, 0x3f);
+    cin >> k >> m >> S >> E;
+    if (!mp.count(S)) mp[S] = ++n;
+    if (!mp.count(E)) mp[E] = ++n;
+    S = mp[S], E = mp[E];
+    rep(m) {
+        ll u, v, w;
+        cin >> w >> u >> v;
+        if (!mp.count(u)) mp[u] = ++n;
+        if (!mp.count(v)) mp[v] = ++n;
+        u = mp[u], v = mp[v];
+        g[u][v] = g[v][u] = min(g[u][v], w);
+    }
+    qmi();
+    print(res[S][E]);
 }
 
 signed main() {

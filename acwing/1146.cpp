@@ -72,71 +72,41 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: 排序
-// URL: https://www.acwing.com/problem/content/345/
+// Problem: 连接格点
+// URL: https://www.acwing.com/problem/content/1146/
 // ===========================================================
-cint N = 26;
+struct vec {
+    int u, v, w;
+};
+cint N = 1005, M = N * N;
 
-int n, m;
-bool g[N][N], d[N][N];
-bool st[N];
+int n, m, ans;
+int cnt;
+int fa[M];
+vec edge[M << 2];
+int dx[] = {-1, 1, 0, 0}, dy[] = {0, 0, -1, 1};
 
-void floyd() {
-    rp(i, 0, n) rp(j, 0, n) d[i][j] = g[i][j];
-    rp(k, 0, n) rp(i, 0, n) rp(j, 0, n) d[i][j] |= d[i][k] & d[k][j];
-}
-
-int check() {
-    rp(i, 0, n) if (d[i][i]) return 2;
-    rp(i, 0, n) rp(j, 0, i) if (!d[i][j] && !d[j][i]) return 0;
-    return 1;
-}
-
-char get_min() {
-    rp(i, 0, n) {
-        if (st[i]) continue;
-        bool flg = 1;
-        rp(j, 0, n) {
-            if (!st[j] && d[j][i]) {
-                flg = 0;
-                break;
-            }
-        }
-        if (flg) {
-            st[i] = 1;
-            return 'A' + i;
-        }
-    }
-    return '0';
-}
-
-void oho() {
-    mset(g, 0), mset(d, 0);
-    int type = 0, rd;
-    char c[5];
-    rep(i, m) {
-        cin >> c;
-        int a = c[0] - 'A', b = c[2] - 'A';
-        if (!type) {
-            g[a][b] = d[a][b] = 1;
-            // floyd();
-            // u->a->b->v
-            rp(u, 0, n) d[u][b] |= d[u][a], d[a][u] |= d[b][u];
-            rp(u, 0, n) rp(v, 0, n) d[u][v] |= d[u][a] & d[b][v];
-            type = check();
-            if (type) rd = i;
-        }
-    }
-    if (!type) return print("Sorted sequence cannot be determined.");
-    if (type == 2) return print("Inconsistency found after", rd, "relations.");
-    mset(st, 0);
-    cout << "Sorted sequence determined after " << rd << " relations: ";
-    rep(n) wt(get_min());
-    print(".");
-}
-
+int pos(int x, int y) { return (x - 1) * m + y; }
+bool valid(int x, int y) { return 1 <= x && x <= n && 1 <= y && y <= m; }
+int get(int x) { return fa[x] == x ? x : fa[x] = get(fa[x]); }
+void merge(int x, int y) { fa[get(x)] = get(y); }
 void solve() {
-    while (cin >> n >> m, n || m) oho();
+    cin >> n >> m;
+    rep(i, n * m) fa[i] = i;
+    int x1, x2, y1, y2;
+    while (cin >> x1 >> y1 >> x2 >> y2) edge[++cnt] = {pos(x1, y1), pos(x2, y2), 0};
+    rep(i, n) rep(j, m) rep(k, 0, 3) {
+        int x = i + dx[k], y = j + dy[k];
+        int p1 = pos(i, j), p2 = pos(x, y);
+        if (valid(x, y)) edge[++cnt] = {p1, p2, dx[k] ? 1 : 2};
+    }
+    sort(all(edge, cnt), [](auto x, auto y) { return x.w < y.w; });
+    rep(i, cnt) {
+        auto [u, v, w] = edge[i];
+        int x = get(u), y = get(v);
+        if (x != y) ans += w, merge(x, y);
+    }
+    print(ans);
 }
 
 signed main() {

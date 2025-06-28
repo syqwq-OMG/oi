@@ -72,71 +72,44 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: 排序
-// URL: https://www.acwing.com/problem/content/345/
+// Problem: 观光之旅
+// URL: https://www.acwing.com/problem/content/346/
 // ===========================================================
-cint N = 26;
+cint N = 105;
 
 int n, m;
-bool g[N][N], d[N][N];
-bool st[N];
+ll g[N][N], d[N][N], pos[N][N];
+ll ans = inf<ll>;
+vi path;
 
+void get(ll u, ll v) {
+    ll t = pos[u][v];
+    if (!t) return;
+    get(u, t), path.push_back(t), get(t, v);
+}
 void floyd() {
-    rp(i, 0, n) rp(j, 0, n) d[i][j] = g[i][j];
-    rp(k, 0, n) rp(i, 0, n) rp(j, 0, n) d[i][j] |= d[i][k] & d[k][j];
-}
-
-int check() {
-    rp(i, 0, n) if (d[i][i]) return 2;
-    rp(i, 0, n) rp(j, 0, i) if (!d[i][j] && !d[j][i]) return 0;
-    return 1;
-}
-
-char get_min() {
-    rp(i, 0, n) {
-        if (st[i]) continue;
-        bool flg = 1;
-        rp(j, 0, n) {
-            if (!st[j] && d[j][i]) {
-                flg = 0;
-                break;
+    rep(k, n) {
+        rep(i, k - 1) rep(j, i + 1, k - 1) {
+            if (chmin(ans, d[i][j] + g[i][k] + g[k][j])) {
+                path.clear();
+                path.push_back(i), get(i, j), path.push_back(j), path.push_back(k);
             }
         }
-        if (flg) {
-            st[i] = 1;
-            return 'A' + i;
-        }
+        rep(i, n) rep(j, n) if (chmin(d[i][j], d[i][k] + d[k][j])) pos[i][j] = k;
     }
-    return '0';
 }
-
-void oho() {
-    mset(g, 0), mset(d, 0);
-    int type = 0, rd;
-    char c[5];
-    rep(i, m) {
-        cin >> c;
-        int a = c[0] - 'A', b = c[2] - 'A';
-        if (!type) {
-            g[a][b] = d[a][b] = 1;
-            // floyd();
-            // u->a->b->v
-            rp(u, 0, n) d[u][b] |= d[u][a], d[a][u] |= d[b][u];
-            rp(u, 0, n) rp(v, 0, n) d[u][v] |= d[u][a] & d[b][v];
-            type = check();
-            if (type) rd = i;
-        }
-    }
-    if (!type) return print("Sorted sequence cannot be determined.");
-    if (type == 2) return print("Inconsistency found after", rd, "relations.");
-    mset(st, 0);
-    cout << "Sorted sequence determined after " << rd << " relations: ";
-    rep(n) wt(get_min());
-    print(".");
-}
-
 void solve() {
-    while (cin >> n >> m, n || m) oho();
+    cin >> n >> m;
+    rep(i, n) rep(j, n) d[i][j] = g[i][j] = inf<ll>;
+    rep(m) {
+        ll u, v, w;
+        cin >> u >> v >> w;
+        chmin(g[u][v], w);
+        g[v][u] = d[u][v] = d[v][u] = g[u][v];
+    }
+    floyd();
+    if (ans == inf<ll>) print("No solution.");
+    for (auto x : path) cout << x << " ";
 }
 
 signed main() {

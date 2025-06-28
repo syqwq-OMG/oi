@@ -1,80 +1,108 @@
 #include <bits/stdc++.h>
-#define mod 1000000007
-#define int long long
 using namespace std;
-struct node {
-    int t, x, y, a;
-} a[1200005];
-int tag[1200005], sy[1200005];
-vector<int> vx[1200005], vy[1200005], vxda[1200005];
-const int B = 314;
-int pw[1200005];
-inline int read() {
-    int s = 0, w = 1;
-    char ch = getchar();
-    while (ch < '0' || ch > '9') {
-        if (ch == '-') w = -1;
-        ch = getchar();
+#define cint const int
+#define cdouble const double
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<ll, ll> PII;
+typedef vector<ll> vi;
+typedef vector<PII> vpii;
+template <class T>
+constexpr T inf = 0;
+template <>
+constexpr int inf<int> = 1'010'000'000;
+template <>
+constexpr ll inf<ll> = 2'020'000'000'000'000'000;
+template <>
+constexpr double inf<double> = inf<ll>;
+#define fi first
+#define se second
+// https://trap.jp/post/1224/
+#define rep1(a) for (ll _ = 0; _ < ll(a); _++)
+#define rep2(i, a) for (ll i = 1; i <= ll(a); i++)
+#define rep3(i, a, b) for (ll i = (a); i <= ll(b); i++)
+#define rep4(i, a, b, d) for (ll i = (a); i <= ll(b); i += (d))
+#define rp3(i, a, b) for (ll i = (a); i < ll(b); i++)
+#define rp4(i, a, b, d) for (ll i = (a); i < ll(b); i += (d))
+#define per2(i, a) for (ll i = (a); i >= 1; i--)
+#define per3(i, a, b) for (ll i = (a); i >= ll(b); i--)
+#define per4(i, a, b, d) for (ll i = (a); i >= ll(b); i -= (d))
+#define pr3(i, a, b) for (ll i = (a) - 1; i >= ll(b); i--)
+#define pr4(i, a, b, d) for (ll i = (a) - 1; i >= ll(b); i -= (d))
+#define overload4(a, b, c, d, e, ...) e
+#define rep(...) overload4(__VA_ARGS__, rep4, rep3, rep2, rep1)(__VA_ARGS__)
+#define rp(...) overload4(__VA_ARGS__, rp4, rp3)(__VA_ARGS__)
+#define per(...) overload4(__VA_ARGS__, per4, per3, per2)(__VA_ARGS__)
+#define pr(...) overload4(__VA_ARGS__, pr4, pr3)(__VA_ARGS__)
+#define mset(f, z) memset(f, z, sizeof(f))
+#define elif else if
+#define all(x, n) x + 1, x + 1 + n
+#define MIN(v, n) *min_element(all(v, n))
+#define MAX(v, n) *max_element(all(v, n))
+auto chmax = [](auto &_a, const auto &_b) -> bool { return _a < _b ? _a = _b, 1 : 0; };
+auto chmin = [](auto &_a, const auto &_b) -> bool { return _a > _b ? _a = _b, 1 : 0; };
+template <class T>
+void wt(const T _x) { cout << _x; }
+template <>
+void wt(const PII _x) { cout << _x.fi << " " << _x.se; }
+void print() { cout << endl; }
+template <class Head, class... Tail>
+void print(Head &&head, Tail &&...tail) {
+    wt(head);
+    if (sizeof...(Tail)) wt(' ');
+    print(std::forward<Tail>(tail)...);
+}
+template <class T>
+void aprint(const T *_arr, int _l, int _r) {
+    if (_l <= _r) rep(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
+    else per(i, _l, _r) cout << _arr[i] << " \n"[i == _r];
+}
+ll gcd(ll _x, ll _y) { return _y ? gcd(_y, _x % _y) : _x; }
+void YES(bool t = 1) { cout << (t ? "YES" : "NO") << endl; }
+void NO(bool t = 1) { YES(!t); }
+void Yes(bool t = 1) { cout << (t ? "Yes" : "No") << endl; }
+void No(bool t = 1) { Yes(!t); }
+void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
+void no(bool t = 1) { yes(!t); }
+cint PRECISION = 5;
+// #define int long long
+// #define CF
+// ===========================================================
+// Problem: $(PROBLEM)
+// URL: $(URL)
+// ===========================================================
+cint N = 10005;
+
+int qsort(int *a, int l, int r, int k) {
+    if (l >= r) return a[l];
+    int mid = a[(l + r) >> 1];
+    int i = l - 1, j = r + 1;
+    while (l < r) {
+        do i++;
+        while (i <= r && a[i] <= mid);
+        do j--;
+        while (j >= l && a[j] >= mid);
+        if (i < j) swap(a[i], a[j]);
     }
-    while (ch >= '0' && ch <= '9') s = s * 10 + ch - '0', ch = getchar();
-    return s * w;
 }
-int ksm(int x, int y) {
-    int rtn = 1;
-    while (y) {
-        if (y & 1) rtn = (rtn * x) % mod;
-        x = x * x % mod, y >>= 1;
-    }
-    return rtn;
+void solve() {
+    int n, a[N], k;
+    cin >> n;
+    rep(i, n) cin >> a[i];
+    cin >> k;
+    print(qsort(a, 1, n, k));
 }
-int f(int a, int x) {
-    return ksm(a, pw[x]);
-}
+
 signed main() {
-    pw[0] = 1;
-    for (int i = 1; i <= 1200000; i++)
-        pw[i] = (pw[i - 1] << 1) % (mod - 1);
-    int n, m;
-    n = read(), m = read();
-    for (int i = 1; i <= n; i++) {
-        a[i].x = read(), a[i].y = read(), a[i].a = read();
-        a[i].t = 0;
-        vx[a[i].x].push_back(i);
-        vy[a[i].y].push_back(i);
-        sy[a[i].y] += a[i].a;
-    }
-    for (int i = 1; i <= n; i++) {
-        if (vy[a[i].y].size() >= B)
-            vxda[a[i].x].push_back(i);
-    }
-    while (m--) {
-        int op, x;
-        op = read(), x = read();
-        if (op == 1) {
-            ++tag[x];
-            for (auto t : vxda[x]) {
-                sy[a[t].y] -= a[t].a;
-                a[t].a = (a[t].a * a[t].a) % mod;
-                sy[a[t].y] += a[t].a;
-            }
-        } else {
-            if (vy[x].size() >= B) {
-                printf("%lld\n", (sy[x] % mod + mod) % mod);
-                // cout << (sy[x] % mod + mod) % mod << "\n";
-                continue;
-            }
-            int rtn = 0;
-            for (auto t : vy[x]) {
-                if (a[t].t + tag[a[t].x] != 0) {
-                    int d = (a[t].t + tag[a[t].x]);
-                    a[t].t -= d;
-                    a[t].a = f(a[t].a, d);
-                }
-                rtn += a[t].a;
-            }
-            printf("%lld\n", (rtn % mod + mod) % mod);
-            // cout << (rtn % mod + mod) % mod << "\n";
-        }
-    }
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.setf(ios::fixed), cout.precision(PRECISION);
+    // ================================================
+    int T = 1;
+#ifdef CF
+    cin >> T;
+#endif
+    rep(T) solve();
+    // ================================================
     return 0;
 }
