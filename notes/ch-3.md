@@ -19,6 +19,7 @@
 #### 最小生成树
 - **任意一棵最小生成树一定包含无向图中权值最小的边**。
 证明：假设不包含最小的边，那么在树中加上这条边会构成一个环，此时，用最小边替换环上任意一条边，都可以得到更优解，矛盾。所以一定包含最小的边
+- 无向图联通块可以缩点，然后在联通块之间跑mst
 - prim算法
   - 朴素版本（邻接矩阵） $O(n^{2})$
   - 维护一个已经在mst中的集合，每次贪心加入**到这个集合距离最短的点**。
@@ -1121,6 +1122,109 @@ void solve() {
         auto [u, v, w] = edge[i];
         int x = get(u), y = get(v);
         if (x != y) ans += w, merge(x, y);
+    }
+    print(ans);
+}
+```
+#### [1146. 新的开始](https://www.acwing.com/problem/content/1148/)
+##### 思路
+感觉就是点权的一种处理方式，就是建立虚拟源点，然后连边变成边权
+##### 蒟蒻代码
+``` cpp
+cint N = 305;
+
+int n, g[N][N];
+int dis[N];
+bitset<N> st;
+ll prim() {
+    rep(i, 0, n) dis[i] = inf<int>;
+    ll ans = 0;
+    dis[0] = 0;
+    rep(n + 1) {
+        int t = -1;
+        rep(i, 0, n) if (!st[i] && (t == -1 || dis[i] < dis[t])) t = i;
+        st[t] = 1, ans += dis[t];
+        rep(i, n) chmin(dis[i], g[t][i]);
+    }
+    return ans;
+}
+void solve() {
+    cin >> n;
+    rep(i, n) { cin >> g[0][i], g[i][0] = g[0][i]; }
+    rep(i, n) rep(j, n) cin >> g[i][j];
+    print(prim());
+}
+```
+#### [1145. 北极通讯网络](https://www.acwing.com/problem/content/1147/)
+##### 思路
+就是把mst中按照边权大小排序的后k条边去掉就行
+##### 蒟蒻代码
+``` cpp
+struct node {
+    ll u, v, w;
+};
+cint N = 505, M = N * N;
+
+ll n, k;
+ll x[N], y[N];
+ll fa[N];
+ll cnt = 0;
+node edge[M];
+
+ll dist(ll a, ll b) {
+    ll dx = x[a] - x[b], dy = y[a] - y[b];
+    return dx * dx + dy * dy;
+}
+ll get(ll a) { return fa[a] == a ? a : fa[a] = get(fa[a]); }
+void merge(ll a, ll b) { fa[get(a)] = get(b); }
+void solve() {
+    cin >> n >> k;
+    rep(i, n) fa[i] = i;
+    rep(i, n) cin >> x[i] >> y[i];
+    rep(i, n) rep(j, n) if (i != j) edge[++cnt] = {i, j, dist(i, j)};
+    ll mx = 0;
+    sort(all(edge, cnt), [](auto a, auto b) { return a.w < b.w; });
+    ll used = 0;
+    rep(i, cnt) {
+        if (used >= n - k) break;
+        auto [u, v, w] = edge[i];
+        ll a = get(u), b = get(v);
+        if (a == b) continue;
+        merge(a, b), chmax(mx, w), used++;
+    }
+    print(sqrt(mx));
+}
+```
+####
+##### 思路
+##### 蒟蒻代码
+``` cpp
+struct node {
+    int u, v, w;
+};
+cint N = 6005;
+
+int n;
+int fa[N];
+int sz[N];
+node edge[N];
+int get(int x) { return fa[x] == x ? x : fa[x] = get(fa[x]); }
+void solve() {
+    cin >> n;
+    rep(i, n) fa[i] = i, sz[i] = 1;
+    rep(i, n - 1) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        edge[i] = {u, v, w};
+    }
+    sort(all(edge, n - 1), [](auto x, auto y) { return x.w < y.w; });
+    ll ans = 0;
+    rep(i, n - 1) {
+        auto [u, v, w] = edge[i];
+        int x = get(u), y = get(v);
+        if (x == y) continue;
+        ans += 1ll * (sz[x] * sz[y] - 1) * (w + 1);
+        fa[x] = y, sz[y] += sz[x];
     }
     print(ans);
 }
