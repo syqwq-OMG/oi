@@ -27,6 +27,34 @@
 - kruskal算法 
   - 直接存边
   - 时间复杂度 $O(m\log m)$
+- **（严格）次小生成树**
+  - 把图的所有生成树按照权值大小进行排序，第二小的为次小生成树。
+  - 方法1：先求mst，再枚举删除mst中的边，再在剩余的边中做一遍mst，时间复杂度 $O(m\log m + nm)$，不太好求严格次小生成树
+  - 方法2：先求mst，然后依次枚举非树边，将该边加入树中，同时从树中去掉一条边，使得最终的图仍是一棵树，则一定可以求出次小生成树。时间复杂度 $O(m+n^{2}+m\log m)$，数据结构可以优化求树上两点间最长边的大小的时间复杂度
+  - 次小生成树一定在mst的邻集中
+#### 负环
+- 会和01分数规划在一起
+- 存在一个环路，使得这一圈的边权之和小于0
+- 一般使用spfa算法（**假设一共有 n个点**）
+  - 统计每个点入队的次数，如果某个点入队n次，则说明存在负环（等价于bellman ford算法，n条边，有n+1个点，则必然存在环）
+  - 统计当前每个点的最短路中所包含的边的数量，如果某个点的大于等于n，则也说明存在负环（有n+1个点，则必然存在环）
+- 如果原图可能不连通，那么**将所有点入队，并且将dis初始化成0**，这是因为可以构造一个虚拟源点，如果原图有负环，那么新图一定也有负环，且新图中的负环一定是从虚拟源点走到的
+- 理论上是 $O(m)$，但实际上可能是 $O(nm)$，所以经验之谈，当所有点的入队次数超过一个阈值（比如2n）我们就认为图中有很大可能存在负环；也可以把spfa中的队列换成栈
+#### 差分约束
+- 可以求不等式组的可行解，每个不等式形如 $x_i \le x_j + c_k$
+- 如何求最大值或者最小值
+- 考虑求$x_i \le x_j + c_k$，那么假设有一个原点，在一张图上跑最短路，我们如果有一条从 j -> i的长度为c的边，那么如果图中没有负环，则一定有 $d[i] \le  d[j]+ c_k$ 因为松弛操作，如果不满足这个条件，那么经过松弛也一定会满足。那么**源点要满足：从源点出发，一定可以到达所有的边**，因为只有能遍历到的边，才会进行松弛操作，最后满足这个不等式。
+- 求可行解的步骤：
+  - > 1 把每个x[i] ≤ x[j] + C[k]不等式转化为一条从x[j]走到x[i]长度为C[k]的边
+    > 2 然后在这个图上找一个超级源点,使得该源点一定可以遍历到所有边 
+    > 3 从源点求一遍 单源最短路
+    > 3.1 假如存在负环
+      不等式无解 <=> 存在负环
+    > 4 求完单源最短路之后
+    > 4.1 存在负环 => 不等式无解
+    > 4.2 没有负环 => 求完之后一定是满足这个不等式的 <=> 即一个可行解
+- 也可以使用最长路，也就是 $d[i]\ge d[j]+c_k$，就是改变一下不等式建图的方向和边权，那么无解就等价于正环
+- 求最小的可行解和最大的可行解（这里的最值是每个变量的最值）：**如果求的是最小值，则应该求最长路，如果求的是最大值，则应该求最短路**。比如求最小值，那么必然有一种条件比如 $x_1\ge 0$ 如何把这种不等式变成一条边呢？$x_i \le c$ ，建立一个虚拟源点0，那么就是 $x_i \le  0+c$ ，于是建立从 0 到 i的边即可。**如果求的是最大值**，比如 $x_i \le  x_j +c_1 \le  x_k + c_2+c_3 \le  \cdots \le  0+\sum c$所以我们要考虑所有这样的从 $x_i$ 出发的不等式链，然后取最后终点所计算出的**上界的最小值**。这其中每一条不等式链，都是从0出发走到 $x_i$ 的一条路径。
 ### 水题 awa
 #### [1129. 热浪](https://www.acwing.com/problem/content/1131/)
 ##### 思路
@@ -1195,8 +1223,9 @@ void solve() {
     print(sqrt(mx));
 }
 ```
-####
+#### [346. 走廊泼水节](https://www.acwing.com/problem/content/348/)
 ##### 思路
+其实，intuition比较容易想到，就是考虑kruskal的过程，其实可以看成是把连通块进行缩点之后，再选择一条边权最短的边，而完全图要求连通块内部的边的数量是饱和的，所以，只要满足每次弄出来的连通块内部的边都比选的边要大就行，因为是最小值，所以只要大1就行，然后每次在进行连通块合并的时候进行加这些用来使得他饱和的边即可。
 ##### 蒟蒻代码
 ``` cpp
 struct node {
@@ -1227,5 +1256,427 @@ void solve() {
         fa[x] = y, sz[y] += sz[x];
     }
     print(ans);
+}
+```
+#### [1148. 秘密的牛奶运输](https://www.acwing.com/problem/content/description/1150/)
+##### 思路
+严格次小生成树模板题。
+- 求最小生成树，统计标记每条边是否是树边；同时把最小生成树建立，权值之和为sum
+- 预处理生成树中任意两点间的边权最大值dist1[a][b]和长度次大dist2[a][b]（树中两点路径唯一，dfs）
+- 依次枚举所有非MST边t，边t连接a，b,权为w。显然a，b在MST中。尝试用t替换a-b的路径中最大的一条边A，A权为a。w > a。（若w < a,t边是外部边，直接换边就能得到更小的生成树，矛盾了）
+- 如果w > a,替换后总权值是sum+w−dist1[a][b]
+- 否则 w = a ，不能替换A边，会得到非严格次小生成树（权值和MST相等） 所以该做法也能得到非严
+- w = a，w > 次大值b 则可以替换b的边，替换后总权值是sum+w−dist2[a][b]
+> 如果求的是非严格的次小生成树，那么维护最大边权就行，但是如果求的是严格次小生成树，那么还要维护次大边权，因为如果最大边权和没选的边一样长，不一定是无解的，可能环上的次大边可以被替换。
+
+##### 蒟蒻代码
+略
+
+#### [904. 虫洞](https://www.acwing.com/problem/content/906/)
+##### 思路
+spfa判负环模板题
+##### 蒟蒻代码
+``` cpp
+cint N = 510, M = 5210;
+
+int n, m1, m2;
+vpii g[N];
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+bool spfa() {
+    int dis[N], cnt[N];
+    bitset<N> inq;
+    queue<int> q;
+    rep(i, n) q.push(i);
+    rep(i, n) dis[i] = 0, cnt[i] = 0, inq[i] = 1;
+    while (q.size()) {
+        auto u = q.front();
+        q.pop();
+        inq[u] = 0;
+        for (auto [v, w] : g[u]) {
+            if (chmin(dis[v], dis[u] + w)) {
+                cnt[v] = cnt[u] + 1;
+                if (cnt[v] > n) return 1;
+                if (!inq[v]) q.push(v);
+            }
+        }
+    }
+    return 0;
+}
+void solve() {
+    cin >> n >> m1 >> m2;
+    rep(i, n) g[i].clear();
+    rep(m1) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w), add(v, u, w);
+    }
+    rep(m2) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, -w);
+    }
+    if (spfa()) return YES();
+    else return NO();
+}
+```
+#### [361. 观光奶牛](https://www.acwing.com/problem/content/363/)
+##### 思路
+01分数规划 转化为 二分判定，也就是要求 $\sum f_i / \sum t_i > x \iff \sum (f_i - x \cdot t_i) > 0$ 因为可以把点权缩到边权中，所以等价于判定图中存在正环，
+##### 蒟蒻代码
+``` cpp
+cint N = 1005;
+
+int n, m;
+vpii g[N];
+int f[N], cnt[N];
+queue<int> q;
+bitset<N> inq;
+double dis[N];
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+bool check(double x) {
+    while (q.size()) q.pop();
+    rep(i, n) q.push(i), inq[i] = 1, dis[i] = 0, cnt[i] = 0;
+    while (q.size()) {
+        int u = q.front();
+        q.pop();
+        inq[u] = 0;
+        for (auto [v, w] : g[u]) {
+            if (chmax(dis[v], dis[u] + f[u] - w * x)) {
+                cnt[v] = cnt[u] + 1;
+                if (cnt[v] >= n) return 1;
+                if (!inq[v]) q.push(v), inq[v] = 1;
+            }
+        }
+    }
+    return 0;
+}
+void solve() {
+    cin >> n >> m;
+    rep(i, n) cin >> f[i];
+    rep(m) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w);
+    }
+    double l = 0, r = 1010;
+    while (r - l > 1e-4) {
+        double mid = (l + r) / 2;
+        if (check(mid)) l = mid;
+        else r = mid;
+    }
+    print(l);
+}
+```
+####
+##### 思路
+1. 建图
+如果把单词看成点，把连接看成边，那么点的数量是1e5，边就会到1e10，太大了，于是我们做一个对偶（原来的点变成边，原来的边变成点）比如ababc，就看成是ab和bc之间有一条边，然后边权就是单词的长度，于是问题变成了01分数规划问题
+2. $\sum w_j / \sum s_i$ 最大
+也就是 $\sum w_j  / \sum 1$就是边权之和除以点的数量，于是考虑二分，判定函数是 $\sum w_j / \sum 1 > x \iff \sum (w_j -x) > 0$ 也就是判断新图中是否有正环。显然在x=0的时候最有可能有正环，所以判断是否有解可以看x=0的情况。
+3. 利用经验来优化
+##### 蒟蒻代码
+``` cpp
+cint N = 800, M = 1e5 + 5;
+
+int m;
+vpii g[N];
+double dis[N];
+int cnt[N];
+queue<int> q;
+bitset<N> inq;
+
+void add(int u, int v, int w) { g[u].push_back({v, w}); }
+bool check(double x) {
+    mset(dis, 0), mset(cnt, 0);
+    while (q.size()) q.pop();
+    rep(i, 0, 26 * 26 - 1) inq[i] = 1, q.push(i);
+    int count = 0;
+    while (q.size()) {
+        int u = q.front();
+        inq[u] = 0;
+        q.pop();
+        for (auto [v, w] : g[u]) {
+            if (chmax(dis[v], dis[u] + w - x)) {
+                cnt[v] = cnt[u] + 1;
+                if (cnt[v] >= N) return 1;
+                if (++count >= 10000) return 1;
+                if (!inq[v]) inq[v] = 1, q.push(v);
+            }
+        }
+    }
+    return 0;
+}
+void solve() {
+    while (cin >> m, m) {
+        rep(i, 0, 26 * 26 - 1) g[i].clear();
+        string s;
+        int len;
+        rep(m) {
+            cin >> s;
+            len = s.length();
+            if (len < 2) continue;
+            int u = (s[0] - 'a') * 26 + s[1] - 'a';
+            int v = (s[len - 2] - 'a') * 26 + s[len - 1] - 'a';
+            add(u, v, len);
+        }
+        if (!check(0)) print("No solution");
+        else {
+            double l = 0, r = 1000;
+            while (r - l > 1e-4) {
+                double mid = (l + r) / 2;
+                if (check(mid)) l = mid;
+                else r = mid;
+            }
+            print(l);
+        }
+    }
+}
+```
+#### [1169. 糖果](https://www.acwing.com/problem/content/1171/)
+##### 思路
+考虑每个小朋友有几个糖果，于是求的是 $\sum x_i$ 的最小值，因此不等式应该为 $x_i \ge  x_j +c_k$，这个松弛操作在最长路中出现，因此考虑使用最长路。
+再来考虑约束条件：
+- $x_i = x_j \iff (x_i \ge x_j)\land (x_j \ge  x_i)$
+- $x_i< x_j \iff x_j \ge  x_i + 1$，于是从 i 到 j 建边
+- $x_i \ge  x_j$ 于是从 j 到 i 建边
+- $x_i > x_j \iff x_i \ge  x_j + 1$ 于是从 j 到 i 建边
+- $x_i \le  x_j$ 于是从 i 到 j 建边
+- 显然上面的约束条件，无法得到最小值，于是我们考虑有没有对于单变量的约束，因为每个小朋友不能没有糖，所以有 $x_i \ge  0+1$
+##### 蒟蒻代码
+``` cpp
+cint N = 1e5 + 5, M = 3e5 + 5;
+
+int n, m;
+int idx = 0;
+int h[N], ne[M], w[M], to[M];
+ll dis[N], cnt[N];
+bitset<N> ins;
+stack<int> s;
+
+void add(int u, int v, int ww) {
+    w[++idx] = ww, to[idx] = v, ne[idx] = h[u], h[u] = idx;
+}
+
+bool spfa() {
+    ins[0] = 1, s.push(0);
+    while (!s.empty()) {
+        auto u = s.top();
+        ins[u] = 0, s.pop();
+        for (int i = h[u]; i; i = ne[i]) {
+            int v = to[i], ww = w[i];
+            if (chmax(dis[v], dis[u] + ww)) {
+                cnt[v] = cnt[u] + 1;
+                if (cnt[v] >= n + 1) return 0;
+                if (!ins[v]) s.push(v), ins[v] = 1;
+            }
+        }
+    }
+    return 1;
+}
+
+void solve() {
+    cin >> n >> m;
+    rep(m) {
+        int x, a, b;
+        cin >> x >> a >> b;
+        if (x == 1) add(a, b, 0), add(b, a, 0);
+        elif (x == 2) add(a, b, 1);
+        elif (x == 3) add(b, a, 0);
+        elif (x == 4) add(b, a, 1);
+        else add(a, b, 0);
+    }
+    rep(i, n) add(0, i, 1);
+    auto t = spfa();
+    if (!t) return print(-1);
+    else print(accumulate(all(dis, n), 0ll));
+}
+```
+#### [362. 区间](https://www.acwing.com/problem/content/364/)
+##### 思路
+考虑如何建图，因为题目中的约束条件是区间中数量的限制，因此考虑如何利用这个限制，**设 $s_i$ 表示从1-i中选入Z集合的数字的数量**，类似前缀和。由于求的是最小值，对应的松弛是大于等于，于是考虑最长路。于是我们有如下约束条件
+- $s_i \ge s_{i-1}, i \in [1,50000]$
+- $s_i - s_{i-1} \le 1 \iff s_{i-1}\ge s_i -1, i \in [1,50000]$
+- 区间 $[a,b]$ 中必须选 $c$ 个，就是 $s_b - s_{a-1}\ge c \iff s_{b}\ge s_{a-1}+c$
+但是注意这里的数字从0开始，为了不和我们的虚拟源点冲突，于是我们都要+1，这样就行了
+##### 蒟蒻代码
+``` cpp
+cint N = 5e5 + 5, M = 5e5 + 5;
+
+int n = 5e4 + 1, m;
+int idx = 0, h[N], ne[N], to[N], w[N];
+int dis[N];
+bool inq[N];
+void add(int x, int y, int z) {
+    to[++idx] = y, w[idx] = z, ne[idx] = h[x], h[x] = idx;
+}
+void spfa() {
+    queue<int> q;
+    rep(i, n) dis[i] = -inf<int>;
+    inq[0] = 1, q.push(0);
+    while (q.size()) {
+        int u = q.front();
+        inq[u] = 0, q.pop();
+        for (int i = h[u]; i; i = ne[i]) {
+            int v = to[i];
+            if (chmax(dis[v], dis[u] + w[i]))
+                if (!inq[v]) inq[v] = 1, q.push(v);
+        }
+    }
+}
+void solve() {
+    cin >> m;
+    rep(i, n) add(i - 1, i, 0), add(i, i - 1, -1);
+    rep(m) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        add(a, b + 1, c);
+    }
+    spfa();
+    print(dis[n]);
+}
+```
+
+#### [1170. 排队布局](https://www.acwing.com/problem/content/1172/)
+##### 思路
+考虑如何利用给定的关系，因为求的是最大距离，一个很直觉的想法就是把每个牛的位置作为变量，于是约束条件是
+- $x_i \le  x_{i+1}$
+- $x_j - x_i \le  L \iff x_j \le  x_i + L$
+- $x_j - x_i \ge  D \iff x_i \le  x_j-D$
+
+但是注意这里没有保证**源点要满足：从源点出发，一定可以到达所有的边**，所以可以建一个超级源点0，在位置0，但是因为求的是相对的距离，所以可以不妨设 $x_i\ge 0$（那就是从0向所有点建一条边），且 $x_1=0$，我们可以增加这个0点，也可以由于spfa从0开始，所以把所有点加入初始的栈中即可。
+于是求的是 $x_n$ 的最大值，那么是小于等于的关系，对应的是最短路的松弛操作
+那么，无解对应存在负环，无穷距离对应距离inf也就是到不了，其余就是 $d[n]$
+##### 蒟蒻代码
+``` cpp
+cint N = 1005, M = 2e4 + 5;
+
+int n, m1, m2;
+int idx = 0, h[N], ne[M], to[M], w[M];
+int dis[N], cnt[N];
+stack<int> stk;
+bitset<N> ins;
+
+void add(int a, int b, int c) {
+    to[++idx] = b, w[idx] = c, ne[idx] = h[a], h[a] = idx;
+}
+
+int spfa() {
+    rep(i, n) dis[i] = inf<int>, ins[i] = 1, stk.push(i);
+    dis[1] = 0;
+    while (stk.size()) {
+        int u = stk.top();
+        ins[u] = 0, stk.pop();
+        for (int i = h[u]; i; i = ne[i]) {
+            int v = to[i];
+            if (chmin(dis[v], dis[u] + w[i])) {
+                cnt[v] = cnt[u] + 1;
+                if (cnt[v] >= n) return -1;
+                if (!ins[v]) ins[v] = 1, stk.push(v);
+            }
+        }
+    }
+    if (dis[n] == inf<int>) return -2;
+    return dis[n];
+}
+void solve() {
+    cin >> n >> m1 >> m2;
+    rep(i, n - 1) add(i + 1, i, 0);
+    rep(m1) {
+        int a, b, c; cin >> a >> b >> c;
+        if (a > b) swap(a, b);
+        add(a, b, c);
+    }
+    rep(m2) {
+        int a, b, c; cin >> a >> b >> c;
+        if (a > b) swap(a, b);
+        add(b, a, -c);
+    }
+    print(spfa());
+}
+```
+#### [393. 雇佣收银员](https://www.acwing.com/problem/content/395/)
+##### 思路
+用 $\max[i]$ 表示某个时刻可以来多少个工人，用 $x_i$ 表示某个时刻有多少的工人，$r_i$ 表示某个时刻的需求数量，那么有如下约束条件：
+- $0\le x_i \le  \max[i]$
+- $\sum_{k=i-7}^{i}x_k\ge r_i$
+
+我们发现第一个约束条件中规中矩，但是第二个不是，但是考虑到这个是区间求和，于是我们利用前缀和（同时注意下标为了之后留出虚拟源点，所以我们下表都+1），用 $s[i]$ 表示 $s[i]=\sum_{k=1}^{i}x_i$，那么两个约束条件改写为：
+- $0\le s[i]-s[i-1]\le \max[i]$
+- if $i\ge 8$,then $s[i]-s[i-1]\ge r_i$
+- if $0<i<7$ then $s[i]+s[24]-s[i+16]\ge r_i$
+
+因为求的是最小值，于是关系使用大于等于号，对应的松弛操作是最长路，于是改写为：
+- $s[i]\ge s[i-1]$
+- $s[i-1]\ge s[i]-\max[i]$
+- if $i\ge 8$ then $s[i]\ge s[i-8]+r_i$
+- if $0<i<7$ then $s[i]\ge s[i+16]-s[24]+r_i$
+
+我们发现除了最后一个式子，别的都很好，那么最后一个式子注意到 $s[24]$ 每次都是他，注意到本题数据范围很小，我们可以枚举 $s[24]$ 从 0 到 1000，这样四个都是很好的不等式了。 而答案就是所有 $x_i$的和，就是 $s[24]$ 于是，我们从小到大枚举，找到第一个有解的情况返回即可，如果都无解，那么整个无解。
+##### 蒟蒻代码
+``` cpp
+cint N = 26;
+cint n = 24;
+
+int r[N];
+int mx[N];
+int dis[N], cnt[N];
+bitset<N> st;
+stack<int> stk;
+int idx = 0;
+int h[N], ne[N << 2], w[N << 2], to[N << 2];
+
+void add(int x, int y, int z) {
+    w[++idx] = z, to[idx] = y, ne[idx] = h[x], h[x] = idx;
+}
+
+void build(int ss) {
+    mset(h, 0);
+    idx = 0;
+    rep(i, n) add(i - 1, i, 0);
+    rep(i, n) add(i, i - 1, -mx[i]);
+    rep(i, 8, n) add(i - 8, i, r[i]);
+    rep(i, 7) add(i + 16, i, r[i] - ss);
+    add(24, 0, -ss), add(0, 24, ss);
+}
+
+bool spfa(int ss) {
+    build(ss);
+    rep(i, 0, n) dis[i] = -inf<int>, cnt[i] = st[i] = 0;
+
+    while (stk.size()) stk.pop();
+    dis[0] = 0, st[0] = 1, stk.push(0);
+    while (stk.size()) {
+        int x = stk.top();
+        st[x] = 0, stk.pop();
+        for (int i = h[x]; i; i = ne[i]) {
+            int y = to[i];
+            if (chmax(dis[y], dis[x] + w[i])) {
+                cnt[y] = cnt[x] + 1;
+                if (cnt[y] >= 25) return 0;
+                if (!st[y]) st[y] = 1, stk.push(y);
+            }
+        }
+    }
+    return 1;
+}
+
+void solve() {
+    rep(i, n) cin >> r[i];
+    int m;
+    cin >> m;
+    mset(mx, 0);
+    rep(m) {
+        int t;
+        cin >> t;
+        mx[t + 1]++;
+    }
+    int ans = 0;
+    while (ans <= m) {
+        if (spfa(ans)) return print(ans);
+        ans++;
+    }
+    print("No Solution");
 }
 ```
