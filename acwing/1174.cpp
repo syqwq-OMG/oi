@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -8,6 +7,10 @@ typedef unsigned long long ull;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
+template <class T>
+using vc = vector<T>;
+template <class T>
+using vvc = vc<vc<T>>;
 template <class T>
 constexpr T inf = 0;
 template <>
@@ -69,29 +72,57 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 祖孙询问
+// URL: https://www.acwing.com/problem/content/1174/
 // ===========================================================
+cint N = 4e4 + 5;
 
-int n;
-priority_queue<int> pq;
-
+int n, m;
+vi g[N];
+int dis[N], fa[N][16];
+void add(int x, int y) { g[x].push_back(y); }
+void bfs(int root) {
+    queue<int> q;
+    mset(dis, 0x3f);
+    dis[0] = 0, dis[root] = 1;
+    q.push(root);
+    while (q.size()) {
+        int u = q.front();
+        q.pop();
+        for (auto v : g[u]) {
+            if (chmin(dis[v], dis[u] + 1)) {
+                q.push(v);
+                fa[v][0] = u;
+                rep(i, 1, 15) fa[v][i] = fa[fa[v][i - 1]][i - 1];
+            }
+        }
+    }
+}
+int lca(int x, int y) {
+    if (dis[x] < dis[y]) swap(x, y);
+    per(i, 15, 0) if (dis[fa[x][i]] >= dis[y]) x = fa[x][i];
+    if (x == y) return x;
+    per(i, 15, 0) if (fa[x][i] != fa[y][i]) x = fa[x][i], y = fa[y][i];
+    return fa[x][0];
+}
 void solve() {
+    int root = -1;
     cin >> n;
     rep(n) {
-        int op;
-        cin >> op;
-        if (op == 1) {
-            int x;
-            cin >> x;
-            pq.push(x);
-        }
-        elif (op == 2) {
-            pq.pop();
-        }
-        else {
-            cout << pq.top() << "\n";
-        }
+        int x, y;
+        cin >> x >> y;
+        if (y == -1) root = x;
+        else add(x, y), add(y, x);
+    }
+    bfs(root);
+    cin >> m;
+    rep(m) {
+        int x, y;
+        cin >> x >> y;
+        int t = lca(x, y);
+        if (t == x) print(1);
+        elif (t == y) print(2);
+        else print(0);
     }
 }
 

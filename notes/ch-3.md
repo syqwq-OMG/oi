@@ -55,6 +55,62 @@
     > 4.2 没有负环 => 求完之后一定是满足这个不等式的 <=> 即一个可行解
 - 也可以使用最长路，也就是 $d[i]\ge d[j]+c_k$，就是改变一下不等式建图的方向和边权，那么无解就等价于正环
 - 求最小的可行解和最大的可行解（这里的最值是每个变量的最值）：**如果求的是最小值，则应该求最长路，如果求的是最大值，则应该求最短路**。比如求最小值，那么必然有一种条件比如 $x_1\ge 0$ 如何把这种不等式变成一条边呢？$x_i \le c$ ，建立一个虚拟源点0，那么就是 $x_i \le  0+c$ ，于是建立从 0 到 i的边即可。**如果求的是最大值**，比如 $x_i \le  x_j +c_1 \le  x_k + c_2+c_3 \le  \cdots \le  0+\sum c$所以我们要考虑所有这样的从 $x_i$ 出发的不等式链，然后取最后终点所计算出的**上界的最小值**。这其中每一条不等式链，都是从0出发走到 $x_i$ 的一条路径。
+
+#### 最近公共祖先
+- 在一棵有根树中，给定两个点，他们的共同祖先中距离他们最近的祖先。
+- 求法：
+  - **向上标记法：** 从一个点往上走直到根并标记所有的祖先，然后另一点往上走，走到的第一个标记过的点就是lca $O(n)$
+  - **倍增法**：预处理数组 $f[i,j]$ 从 $i$ 开始向上走 $2^{j}$ 能够到达点节点，则 $0\le  j \le  \log n$，容易得到状态转移方程是 $f[i,0]=\text{father of }i$, $f[i,j]=f[f[i,j-1],j-1]$，预处理第二个数组 $d[i]$ 表示每个点的深度，就是每个点到根节点的距离+1。具体求lca的时候分两步：1、先将两个点跳到同一层，基于二进制拼凑的思想，就是用 $f$ 数组拼凑出 $d[x]-d[y]$ （这里假设x的深度大于y的），其实就是看 $d[f[i,k]] > d[y]$ 是否 成立，如果成立就可以继续跳 2、让两个点同时往上跳，一直跳到他们lca的下一层，因为这样可以更好判断是否是lca而不是仅仅是公共祖先，就是如果单单只有 $f[x,k]=f[y,k]$ 不能确认是否是最近的公共祖先，那么此时他们的lca就是 $f[k,0]$，所以**预处理 $O(n\log n)$，每次查询的时间复杂度是 $O(\log n)$**，哨兵：如果从 $i$ 跳 $2^{j}$ 跳出了根节点，那么 $f[i,j]=0, d[0]=0$
+  - **tarjan离线求lca**：时间复杂度可以做到 $O(n+m)$，本质上是对向上标记法的一个优化。
+  > 将遍历过程中遇到的所有节点划分为三类，标记数组为st[N]
+    1> st[u] = 0, 代表节点u还未被遍历到
+    2> st[u] = 1, 代表节点u被遍历到，但还 未回溯/未完成以i为根节点的子树的遍历
+    3> st[u] = 2, 代表节点u被遍历到，同时 完成了回溯/完成了以i为根节点的子树的遍历
+    > part2:
+    引入并查集p[N]，初始时p[i] = i
+    p[i]记录了节点i往上回溯寻找满足st[j] == 2的节点的过程中能够抵达的最上层的节点的父节点编号
+    > part3:
+    引入vector<pair<int, int>> query[N]
+    query[u].first 与 u 共同组成查询编号为query[u].second的查询记录
+    查询编号为k代表这条查询记录是输入数据中的第k条查询
+    > part4:
+    任选一个节点为根节点root(如 root = 1)
+    dist[i]记录节点i到root的距离，可由一次简单的dfs得到
+    > part5:
+    当st[u] == 1时，记(u, v)为一条查询，且st[v] == 2
+    查询结果：dist[u] + dist[v] - 2 * dist[find(v)]
+    > 一定要在回溯的时候设爹，因为本质上找的是一个点的所有祖宗里面第一个被标记为1的点，那回溯的时候设爹，就意味着只有标记为2的点是有爹的，那么没设的，也就是并查集的代表元一定是被标记为1的点
+- 树上两点间的最短距离：$d[x]+d[y]-2d[\operatorname{lca}(x,y)]$
+
+
+
+#### 有向图的强联通分量
+- 对于一个有向图，联通分量：对于分量中的任意两点u和v，u可以到v，v也可以到u
+- 强联通分量指的是极大的联通分量，就是加上任意的点后，都不是联通分量
+- 强联通分量可以缩点，进而将任何一个有向图转化成一个DAG（拓扑图）
+- 缩点就是将所有的联通分量变成一个点
+- 对于任意源 x，从它出发进行 DFS，每个点只访问一次，所有发生递归的边会形成以 x
+ 为根的 搜索树。在此过程中，按第一次到达的时间顺序，给每个点标记 时间戳，记 dfn[x]
+- 可以将图中的边分为四类：
+  - 树枝边： 搜索树中的边父亲节点指向儿子节点
+  - 前向边：x指向他的祖先节点y
+  - 后向边：x是y的祖先节点，且x指向y
+  - 横叉边：除了以上三种边，且满足 `dfn[y]<dfn[x]`
+- 求法：
+  - low[x] 表示x的能遍历到的节点中，时间戳的最小值
+  - Tarjan 算法 在 DFS 过程中维护一个栈存储以上节点，定义 low[x]为 x所在 SCC 根的 dfn，通过以下过程维护它
+    > 当 x被初次访问时，将它入栈，令 low[x]=dfn[x]遍历 x的所有出边 (x,y)
+    > 若 y未被访问，递归访问它，回溯后，令 low[x]=min(low[x],low[y])，因为 y能回溯到的点，x经由 y也能到达
+    > 若 y已被访问且在栈中，令 low[x]=min(low[x],dfn[y])从 x回溯前，若 low[x]=dfn[x]，说明 x是当前 SCC 的根，因为它是 SCC 中第一个被访问的点，low值最小，不会被更新.由于每个点和每条边只访问一次，因此 Tarjan 求 SCC 的时间复杂度为线性
+- 缩点：
+  ``` cpp
+  for v in V:
+    for (v, u):
+        if id[v] != id[u]:  // id 是 点所在scc的编号
+            add_edge(id[v], id[u])
+  ```
+- 按 SCC 编号递减顺序遍历，就是 拓扑序
+
 ### 水题 awa
 #### [1129. 热浪](https://www.acwing.com/problem/content/1131/)
 ##### 思路
@@ -1680,3 +1736,424 @@ void solve() {
     print("No Solution");
 }
 ```
+#### [1172. 祖孙询问](https://www.acwing.com/problem/content/1174/)
+##### 思路
+lca模板题
+##### 蒟蒻代码
+``` cpp
+cint N = 4e4 + 5;
+
+int n, m;
+vi g[N];
+int dep[N], fa[N][16];
+void add(int x, int y) { g[x].push_back(y); }
+void bfs(int root) {
+    queue<int> q;
+    mset(dep, 0x3f);
+    dep[0] = 0, dep[root] = 1;
+    q.push(root);
+    while (q.size()) {
+        int u = q.front();
+        q.pop();
+        for (auto v : g[u]) {
+            if (chmin(dep[v], dep[u] + 1)) {
+                q.push(v);
+                fa[v][0] = u;
+                rep(i, 1, 15) fa[v][i] = fa[fa[v][i - 1]][i - 1];
+            }
+        }
+    }
+}
+int lca(int x, int y) {
+    if (dep[x] < dep[y]) swap(x, y);
+    per(i, 15, 0) if (dep[fa[x][i]] >= dep[y]) x = fa[x][i];
+    if (x == y) return x;
+    per(i, 15, 0) if (fa[x][i] != fa[y][i]) x = fa[x][i], y = fa[y][i];
+    return fa[x][0];
+}
+void solve() {
+    int root = -1;
+    cin >> n;
+    rep(n) {
+        int x, y;
+        cin >> x >> y;
+        if (y == -1) root = x;
+        else add(x, y), add(y, x);
+    }
+    bfs(root);
+    cin >> m;
+    rep(m) {
+        int x, y;
+        cin >> x >> y;
+        int t = lca(x, y);
+        if (t == x) print(1);
+        elif (t == y) print(2);
+        else print(0);
+    }
+}
+```
+#### [1171. 距离](https://www.acwing.com/problem/content/1173/)
+##### 思路
+lca模板题
+##### 蒟蒻代码
+``` cpp
+cint N = 1e5 + 5;
+cint M = 2e5 + 5;
+
+int n, m;
+vpii g[N];
+int st[N], dis[N];
+vpii query[M];
+int ans[N];
+int fa[N];
+
+void add(int a, int b, int c) { g[a].push_back({b, c}); }
+void dfs(int u, int p) {
+    for (auto [v, w] : g[u]) {
+        if (v != p) {
+            dis[v] = dis[u] + w;
+            dfs(v, u);
+        }
+    }
+}
+int get(int x) {
+    if (fa[x] == x) return x;
+    return fa[x] = get(fa[x]);
+}
+void tarjan(int u) {
+    st[u] = 1;
+    for (auto [v, w] : g[u]) {
+        if (!st[v]) {
+            tarjan(v);
+            fa[v] = u;
+        }
+    }
+    for (auto [v, id] : query[u]) {
+        if (st[v] == 2) {
+            int anc = get(v);
+            ans[id] = dis[u] + dis[v] - 2 * dis[anc];
+        }
+    }
+    st[u] = 2;
+}
+void solve() {
+    cin >> n >> m;
+    rep(i, n) fa[i] = i;
+    rep(n - 1) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        add(a, b, c), add(b, a, c);
+    }
+    rep(i, m) {
+        int a, b;
+        cin >> a >> b;
+        if (a != b) {
+            query[a].push_back({b, i});
+            query[b].push_back({a, i});
+        }
+    }
+    dfs(1, -1);
+    tarjan(1);
+    rep(i, m) print(ans[i]);
+}
+```
+#### [356. 次小生成树](https://www.acwing.com/problem/content/description/358/)
+##### 思路
+严格次小生成树，考虑从mst中选择一条边，用没选过的边进行替换。但是要注意我们不能仅仅维护两点间的最大值，还要考虑两点间的**次大值**，因为可能在加入一条边的环中，原来的最大值和现在是一样的，但是次大值比现在的新加的边要小，也是可以进行替换作为候选项的。
+##### 蒟蒻代码
+``` cpp
+cint N = 3e5 + 5;
+
+struct node {
+    ll u, v, w;
+};
+
+ll n, m;
+vpii g[N];
+node edge[N];
+bool st[N];
+ll fa[N];
+ll mst = 0;
+ll ans = inf<ll>;
+ll dep[N], f[N][18], d1[N][18], d2[N][18];
+
+void add(ll x, ll y, ll z) { g[x].push_back({y, z}); }
+ll get(ll x) {
+    if (fa[x] == x) return x;
+    return fa[x] = get(fa[x]);
+}
+// used to change the first and secong max value of df and ds
+void change(ll &df, ll &ds, ll t) {
+    if (t > df) ds = df, df = t;
+    elif (t != df && t > ds) ds = t;
+}
+void bfs() {
+    queue<int> q;
+    dep[1] = 1, q.push(1);
+    while (q.size()) {
+        int u = q.front();
+        q.pop();
+        for (auto [v, w] : g[u]) {
+            if (dep[v]) continue; // exclude the parent node
+            dep[v] = dep[u] + 1;
+            d1[v][0] = w, d2[v][0] = -inf<ll>;
+            f[v][0] = u;
+            rep(i, 1, 17) {
+                ll anc = f[v][i - 1];
+                f[v][i] = f[anc][i - 1];
+                ll distance[] = {d1[v][i - 1], d2[v][i - 1], d1[anc][i - 1], d2[anc][i - 1]};
+                d1[v][i] = d2[v][i] = -inf<ll>;
+                rep(j, 0, 3) {
+                    int d = distance[j];
+                    change(d1[v][i], d2[v][i], d);
+                }
+            }
+            q.push(v);
+        }
+    }
+}
+void build() {
+    rep(i, m) {
+        if (st[i]) {
+            auto [x, y, z] = edge[i];
+            add(x, y, z), add(y, x, z);
+        }
+    }
+}
+ll lca(ll u, ll v, ll w) {
+    ll disf = -inf<ll>, diss = -inf<ll>;
+    if (dep[u] < dep[v]) swap(u, v);
+    per(i, 17, 0) {
+        if (dep[f[u][i]] >= dep[v]) {
+            change(disf, diss, d1[u][i]);
+            change(disf, diss, d2[u][i]);
+            u = f[u][i];
+        }
+    }
+    if (u != v) {
+        per(i, 17, 0) {
+            if (f[u][i] != f[v][i]) {
+                change(disf, diss, d1[u][i]);
+                change(disf, diss, d2[u][i]);
+                change(disf, diss, d1[v][i]);
+                change(disf, diss, d2[v][i]);
+                u = f[u][i], v = f[v][i];
+            }
+        }
+        change(disf, diss, d1[u][0]);
+        change(disf, diss, d1[v][0]);
+    }
+    if (w > disf) return w - disf;
+    if (w > diss) return w - diss;
+    return inf<ll>;
+}
+void solve() {
+    cin >> n >> m;
+    rep(i, n) fa[i] = i;
+    rep(i, m) {
+        int x, y, z;
+        cin >> x >> y >> z;
+        edge[i] = {x, y, z};
+    }
+    sort(all(edge, m), [](auto x, auto y) { return x.w < y.w; });
+    rep(i, m) {
+        auto [u, v, w] = edge[i];
+        ll x = get(u), y = get(v);
+        if (x != y) {
+            fa[x] = y, mst += w;
+            st[i] = 1;
+        }
+    }
+    build();
+    bfs();
+    ll ans = inf<ll>;
+    rep(i, m) {
+        if (st[i]) continue;
+        auto [u, v, w] = edge[i];
+        chmin(ans, mst + lca(u, v, w));
+    }
+    print(ans);
+}
+```
+#### [352. 闇の連鎖](https://www.acwing.com/problem/content/description/354/)
+##### 思路
+题目意思说有两种边，一种是树边，一种是非树边，每次可以切一条树边一条非树边，请问能变得不联通的方案有多少种？那么计数问题的关键就是对集合的划分，我们在这里按照非树边进行划分，因为对于一棵树而言，增加一条边就意味着出现一个环，要想让图变得不联通，那就要在这个环里面至少去除两条边。所以对于这个环里面的任意一条边，我可以去除自身，并且一定要去除非树边，因为两次删边一定又一次要是非树边。（其实本来是按照每条非树边考虑，就是他造成的环中自己要删除，还要删除一条环中的任意树边，但是这里注意变换视角，这很重要）因此，要让这个环断开，对于这个树边来说，一定要删除这条非树边，那么每一条非树边都会影响一个环上的所有边，那么我们可以统计对于每条边来说受到几个环的影响，如果是0，那么删除这条边就已经能够造成不联通，那么第二条非树边随便删就行，如果是1那么就意味着一定要删除影响他的那条非树边，如果大于1，那么不可能通过仅仅删除一条非树边来使得这图变得不联通，所以最后只要看有几条非树边和当前的边在一个环中，所以这是一个区间修改的问题，因此**考虑使用树上差分，然后将前缀和变成子树和**。（更直观的理解可以考虑把点和边的顺序交换）如果想把树上 $a$ 到 $b$ 的路径全都 $+c$ ，只需要在差分数组做如下操作： $d[a]+=c, d[b]+=c,d[\operatorname{lca}(a,b)]-=2c$ 即可。然后统计的时候，**要看每棵子树的子树和，因为这表示子节点连接当前节点的边的权值！！！**
+##### 蒟蒻代码
+``` cpp
+cint N = 100005;
+
+int n, m;
+vi g[N];
+int dep[N], f[N][20];
+int d[N];
+int ans = 0;
+
+void add(int a, int b) { g[a].push_back(b); }
+void bfs() {
+    queue<int> q;
+    dep[1] = 1, q.push(1);
+    while (q.size()) {
+        int x = q.front();
+        q.pop();
+        for (auto y : g[x]) {
+            if (dep[y]) continue;
+            dep[y] = dep[x] + 1;
+            f[y][0] = x;
+            rep(i, 1, 18) f[y][i] = f[f[y][i - 1]][i - 1];
+            q.push(y);
+        }
+    }
+}
+int lca(int a, int b) {
+    if (dep[a] < dep[b]) swap(a, b);
+    per(i, 18, 0) if (dep[f[a][i]] >= dep[b]) a = f[a][i];
+    if (a == b) return a;
+    per(i, 18, 0) {
+        if (f[a][i] != f[b][i]) {
+            a = f[a][i], b = f[b][i];
+        }
+    }
+    return f[a][0];
+}
+int dfs(int u, int fa) {
+    int res = d[u];
+    for (auto v : g[u]) {
+        if (v == fa) continue;
+        int t = dfs(v, u);
+        if (t == 0) ans += m;
+        elif (t == 1) ans++;
+        res += t;
+    }
+    return res;
+}
+void solve() {
+    cin >> n >> m;
+    rep(n - 1) {
+        int a, b;
+        cin >> a >> b;
+        add(a, b), add(b, a);
+    }
+    bfs();
+    rep(m) {
+        int a, b;
+        cin >> a >> b;
+        int anc = lca(a, b);
+        d[a]++, d[b]++, d[anc] -= 2;
+    }
+    dfs(1, -1);
+    print(ans);
+}
+```
+#### [1174. 受欢迎的牛](https://www.acwing.com/problem/content/description/1176/)
+##### 思路
+就是判断是否有些点，可以被所有其他点访问到。如果该图是拓扑图，那就直接看在最尾部的点是否是唯一就行了，那在这边可以考虑缩点，然后转化成拓扑图上的问题即可。不用真的建图，只要看缩点之后的每个强联通分量的出度就行。
+##### 蒟蒻代码
+``` cpp
+cint N = 1e4 + 5;
+
+int n, m;
+vi g[N];
+stack<int> stk;
+bitset<N> ins;
+int low[N], dfn[N], id[N], sz[N], idx = 0, scnt = 0;
+int out[N];
+
+void add(int a, int b) { g[a].push_back(b); }
+void tarjan(int u) {
+    low[u] = dfn[u] = ++idx;
+    stk.push(u), ins[u] = 1;
+    for (int v : g[u]) {
+        if (dfn[v] == 0) {
+            tarjan(v);
+            chmin(low[u], low[v]);
+        }
+        elif (ins[v]) chmin(low[u], dfn[v]);
+    }
+    if (low[u] == dfn[u]) {
+        ++scnt;
+        int t;
+        do {
+            t = stk.top();
+            ins[t] = 0, stk.pop();
+            id[t] = scnt, sz[scnt]++;
+        } while (t != u);
+    }
+}
+void solve() {
+    cin >> n >> m;
+    rep(m) {
+        int a, b;
+        cin >> a >> b;
+        add(a, b);
+    }
+    rep(i, n) if (dfn[i] == 0) tarjan(i);
+    rep(i, n) {
+        for (int j : g[i]) {
+            int a = id[i], b = id[j];
+            if (a != b) out[a]++;
+        }
+    }
+    int zero = 0, ans = 0;
+    rep(i, scnt) {
+        if (out[i] == 0) {
+            zero++, ans = sz[i];
+            if (zero > 1) return print(0);
+        }
+    }
+    print(ans);
+}
+```
+#### [367. 学校网络](https://www.acwing.com/problem/content/369/)
+##### 思路
+对于拓扑图上来说，第一个问题就是问有几个indeg为0的点。第二问，就是要让所有点都强联通，其实我们也可以这样理解，我们将起点所能到达的终点分为P类，每个起点分别可以到达其中一类，从每个终点分别向下一个起点连一条边，最后一个终点向第一个起点连一条边，这样就构成了一个回路，所有点都可以达到任意点。需要连的边的数量就是 P个终点里面对应的所有点的数量 Q，所以就是P和Q中的最大值。记得特判整个图本来就是强联通的情况。
+##### 蒟蒻代码
+``` cpp
+cint N = 105;
+
+int n;
+vi g[N];
+int sz[N], low[N], id[N], dfn[N], idx = 0, scnt = 0;
+stack<int> stk;
+bitset<N> ins;
+int ind[N], outd[N];
+
+void add(int a, int b) { g[a].push_back(b); }
+void scc(int u) {
+    low[u] = dfn[u] = ++idx;
+    stk.push(u), ins[u] = 1;
+    for (int v : g[u]) {
+        if (!dfn[v]) {
+            scc(v);
+            chmin(low[u], low[v]);
+        }
+        elif (ins[v]) chmin(low[u], dfn[v]);
+    }
+    if (low[u] == dfn[u]) {
+        ++scnt;
+        int t;
+        do {
+            t = stk.top();
+            stk.pop(), ins[t] = 0;
+            id[t] = scnt, sz[scnt]++;
+        } while (t != u);
+    }
+}
+void solve() {
+    cin >> n;
+    int t;
+    rep(i, n) {
+        while (cin >> t, t) add(i, t);
+    }
+    rep(i, n) if (!dfn[i]) scc(i);
+    rep(a, n) for (int b : g[a]) if (id[a] != id[b]) ind[id[b]]++, outd[id[a]]++;
+    int incnt = 0, outcnt = 0;
+    rep(i, scnt) incnt += ind[i] == 0, outcnt += outd[i] == 0;
+    print(incnt);
+    if (scnt == 1) return print(0);
+    print(max(incnt, outcnt));
+}
+```
+####
+##### 思路
+因为强联通分量一定是半联通子图，所以先进行缩点，然后得到的拓扑图中的最大的半联通子图就是最长链，因为不能有分叉，如果有分叉，那么分叉末端中的点不是半联通的了
+##### 蒟蒻代码

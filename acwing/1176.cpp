@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -8,6 +7,10 @@ typedef unsigned long long ull;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
+template <class T>
+using vc = vector<T>;
+template <class T>
+using vvc = vc<vc<T>>;
 template <class T>
 constexpr T inf = 0;
 template <>
@@ -69,30 +72,61 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 受欢迎的牛
+// URL: https://www.acwing.com/problem/content/1176/
 // ===========================================================
+cint N = 1e4 + 5;
 
-int n;
-priority_queue<int> pq;
+int n, m;
+vi cnt[N];
+stack<int> stk;
+bitset<N> ins;
+int low[N], dfn[N], id[N], sz[N], idx = 0, scnt = 0;
+int out[N];
 
+void add(int a, int b) { cnt[a].push_back(b); }
+void tarjan(int u) {
+    low[u] = dfn[u] = ++idx;
+    stk.push(u), ins[u] = 1;
+    for (int v : cnt[u]) {
+        if (dfn[v] == 0) {
+            tarjan(v);
+            chmin(low[u], low[v]);
+        }
+        elif (ins[v]) chmin(low[u], dfn[v]);
+    }
+    if (low[u] == dfn[u]) {
+        ++scnt;
+        int t;
+        do {
+            t = stk.top();
+            ins[t] = 0, stk.pop();
+            id[t] = scnt, sz[scnt]++;
+        } while (t != u);
+    }
+}
 void solve() {
-    cin >> n;
-    rep(n) {
-        int op;
-        cin >> op;
-        if (op == 1) {
-            int x;
-            cin >> x;
-            pq.push(x);
-        }
-        elif (op == 2) {
-            pq.pop();
-        }
-        else {
-            cout << pq.top() << "\n";
+    cin >> n >> m;
+    rep(m) {
+        int a, b;
+        cin >> a >> b;
+        add(a, b);
+    }
+    rep(i, n) if (dfn[i] == 0) tarjan(i);
+    rep(i, n) {
+        for (int j : cnt[i]) {
+            int a = id[i], b = id[j];
+            if (a != b) out[a]++;
         }
     }
+    int zero = 0, ans = 0;
+    rep(i, scnt) {
+        if (out[i] == 0) {
+            zero++, ans = sz[i];
+            if (zero > 1) return print(0);
+        }
+    }
+    print(ans);
 }
 
 signed main() {

@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -8,6 +7,10 @@ typedef unsigned long long ull;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
+template <class T>
+using vc = vector<T>;
+template <class T>
+using vvc = vc<vc<T>>;
 template <class T>
 constexpr T inf = 0;
 template <>
@@ -66,33 +69,123 @@ void No(bool t = 1) { Yes(!t); }
 void yes(bool t = 1) { cout << (t ? "yes" : "no") << endl; }
 void no(bool t = 1) { yes(!t); }
 cint PRECISION = 5;
-// #define int long long
+#define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 次小生成树
+// URL: https://www.acwing.com/problem/content/description/358/
 // ===========================================================
+cint N = 3e5 + 5;
 
-int n;
-priority_queue<int> pq;
+struct node {
+    ll u, v, w;
+};
 
-void solve() {
-    cin >> n;
-    rep(n) {
-        int op;
-        cin >> op;
-        if (op == 1) {
-            int x;
-            cin >> x;
-            pq.push(x);
-        }
-        elif (op == 2) {
-            pq.pop();
-        }
-        else {
-            cout << pq.top() << "\n";
+ll n, m;
+vpii g[N];
+node edge[N];
+bool st[N];
+ll fa[N];
+ll mst = 0;
+ll ans = inf<ll>;
+ll dep[N], f[N][18], d1[N][18], d2[N][18];
+
+void add(ll x, ll y, ll z) { g[x].push_back({y, z}); }
+ll get(ll x) {
+    if (fa[x] == x) return x;
+    return fa[x] = get(fa[x]);
+}
+// used to change the first and secong max value of df and ds
+void change(ll &df, ll &ds, ll t) {
+    if (t > df) ds = df, df = t;
+    elif (t != df && t > ds) ds = t;
+}
+void bfs() {
+    queue<int> q;
+    dep[1] = 1, q.push(1);
+    while (q.size()) {
+        int u = q.front();
+        q.pop();
+        for (auto [v, w] : g[u]) {
+            if (dep[v]) continue; // exclude the parent node
+            dep[v] = dep[u] + 1;
+            d1[v][0] = w, d2[v][0] = -inf<ll>;
+            f[v][0] = u;
+            rep(i, 1, 17) {
+                ll anc = f[v][i - 1];
+                f[v][i] = f[anc][i - 1];
+                ll distance[] = {d1[v][i - 1], d2[v][i - 1], d1[anc][i - 1], d2[anc][i - 1]};
+                d1[v][i] = d2[v][i] = -inf<ll>;
+                rep(j, 0, 3) {
+                    int d = distance[j];
+                    change(d1[v][i], d2[v][i], d);
+                }
+            }
+            q.push(v);
         }
     }
+}
+void build() {
+    rep(i, m) {
+        if (st[i]) {
+            auto [x, y, z] = edge[i];
+            add(x, y, z), add(y, x, z);
+        }
+    }
+}
+ll lca(ll u, ll v, ll w) {
+    ll disf = -inf<ll>, diss = -inf<ll>;
+    if (dep[u] < dep[v]) swap(u, v);
+    per(i, 17, 0) {
+        if (dep[f[u][i]] >= dep[v]) {
+            change(disf, diss, d1[u][i]);
+            change(disf, diss, d2[u][i]);
+            u = f[u][i];
+        }
+    }
+    if (u != v) {
+        per(i, 17, 0) {
+            if (f[u][i] != f[v][i]) {
+                change(disf, diss, d1[u][i]);
+                change(disf, diss, d2[u][i]);
+                change(disf, diss, d1[v][i]);
+                change(disf, diss, d2[v][i]);
+                u = f[u][i], v = f[v][i];
+            }
+        }
+        change(disf, diss, d1[u][0]);
+        change(disf, diss, d1[v][0]);
+    }
+    if (w > disf) return w - disf;
+    if (w > diss) return w - diss;
+    return inf<ll>;
+}
+void solve() {
+    cin >> n >> m;
+    rep(i, n) fa[i] = i;
+    rep(i, m) {
+        int x, y, z;
+        cin >> x >> y >> z;
+        edge[i] = {x, y, z};
+    }
+    sort(all(edge, m), [](auto x, auto y) { return x.w < y.w; });
+    rep(i, m) {
+        auto [u, v, w] = edge[i];
+        ll x = get(u), y = get(v);
+        if (x != y) {
+            fa[x] = y, mst += w;
+            st[i] = 1;
+        }
+    }
+    build();
+    bfs();
+    ll ans = inf<ll>;
+    rep(i, m) {
+        if (st[i]) continue;
+        auto [u, v, w] = edge[i];
+        chmin(ans, mst + lca(u, v, w));
+    }
+    print(ans);
 }
 
 signed main() {

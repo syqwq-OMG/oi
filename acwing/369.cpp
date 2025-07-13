@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -8,6 +7,10 @@ typedef unsigned long long ull;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
+template <class T>
+using vc = vector<T>;
+template <class T>
+using vvc = vc<vc<T>>;
 template <class T>
 constexpr T inf = 0;
 template <>
@@ -69,30 +72,52 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 学校网络
+// URL: https://www.acwing.com/problem/content/369/
 // ===========================================================
+cint N = 105;
 
 int n;
-priority_queue<int> pq;
+vi cnt[N];
+int sz[N], low[N], id[N], dfn[N], idx = 0, scnt = 0;
+stack<int> stk;
+bitset<N> ins;
+int ind[N], outd[N];
 
+void add(int a, int b) { cnt[a].push_back(b); }
+void scc(int u) {
+    low[u] = dfn[u] = ++idx;
+    stk.push(u), ins[u] = 1;
+    for (int v : cnt[u]) {
+        if (!dfn[v]) {
+            scc(v);
+            chmin(low[u], low[v]);
+        }
+        elif (ins[v]) chmin(low[u], dfn[v]);
+    }
+    if (low[u] == dfn[u]) {
+        ++scnt;
+        int t;
+        do {
+            t = stk.top();
+            stk.pop(), ins[t] = 0;
+            id[t] = scnt, sz[scnt]++;
+        } while (t != u);
+    }
+}
 void solve() {
     cin >> n;
-    rep(n) {
-        int op;
-        cin >> op;
-        if (op == 1) {
-            int x;
-            cin >> x;
-            pq.push(x);
-        }
-        elif (op == 2) {
-            pq.pop();
-        }
-        else {
-            cout << pq.top() << "\n";
-        }
+    int t;
+    rep(i, n) {
+        while (cin >> t, t) add(i, t);
     }
+    rep(i, n) if (!dfn[i]) scc(i);
+    rep(a, n) for (int b : cnt[a]) if (id[a] != id[b]) ind[id[b]]++, outd[id[a]]++;
+    int incnt = 0, outcnt = 0;
+    rep(i, scnt) incnt += ind[i] == 0, outcnt += outd[i] == 0;
+    print(incnt);
+    if (scnt == 1) return print(0);
+    print(max(incnt, outcnt));
 }
 
 signed main() {

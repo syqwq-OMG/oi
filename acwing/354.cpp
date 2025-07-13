@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -8,6 +7,10 @@ typedef unsigned long long ull;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
+template <class T>
+using vc = vector<T>;
+template <class T>
+using vvc = vc<vc<T>>;
 template <class T>
 constexpr T inf = 0;
 template <>
@@ -69,30 +72,71 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 闇の連鎖
+// URL: https://www.acwing.com/problem/content/description/354/
 // ===========================================================
+cint N = 100005;
 
-int n;
-priority_queue<int> pq;
+int n, m;
+vi cnt[N];
+int dep[N], f[N][20];
+int d[N];
+int ans = 0;
 
-void solve() {
-    cin >> n;
-    rep(n) {
-        int op;
-        cin >> op;
-        if (op == 1) {
-            int x;
-            cin >> x;
-            pq.push(x);
-        }
-        elif (op == 2) {
-            pq.pop();
-        }
-        else {
-            cout << pq.top() << "\n";
+void add(int a, int b) { cnt[a].push_back(b); }
+void bfs() {
+    queue<int> q;
+    dep[1] = 1, q.push(1);
+    while (q.size()) {
+        int x = q.front();
+        q.pop();
+        for (auto y : cnt[x]) {
+            if (dep[y]) continue;
+            dep[y] = dep[x] + 1;
+            f[y][0] = x;
+            rep(i, 1, 18) f[y][i] = f[f[y][i - 1]][i - 1];
+            q.push(y);
         }
     }
+}
+int lca(int a, int b) {
+    if (dep[a] < dep[b]) swap(a, b);
+    per(i, 18, 0) if (dep[f[a][i]] >= dep[b]) a = f[a][i];
+    if (a == b) return a;
+    per(i, 18, 0) {
+        if (f[a][i] != f[b][i]) {
+            a = f[a][i], b = f[b][i];
+        }
+    }
+    return f[a][0];
+}
+int dfs(int u, int fa) {
+    int res = d[u];
+    for (auto v : cnt[u]) {
+        if (v == fa) continue;
+        int t = dfs(v, u);
+        if (t == 0) ans += m;
+        elif (t == 1) ans++;
+        res += t;
+    }
+    return res;
+}
+void solve() {
+    cin >> n >> m;
+    rep(n - 1) {
+        int a, b;
+        cin >> a >> b;
+        add(a, b), add(b, a);
+    }
+    bfs();
+    rep(m) {
+        int a, b;
+        cin >> a >> b;
+        int anc = lca(a, b);
+        d[a]++, d[b]++, d[anc] -= 2;
+    }
+    dfs(1, -1);
+    print(ans);
 }
 
 signed main() {

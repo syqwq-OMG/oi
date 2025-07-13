@@ -39,3 +39,4 @@ seq sequence
 opposite center path
 dep depth
 build
+anc 祖先

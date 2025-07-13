@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include <queue>
+#include <unordered_set>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -8,6 +8,10 @@ typedef unsigned long long ull;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
+template <class T>
+using vc = vector<T>;
+template <class T>
+using vvc = vc<vc<T>>;
 template <class T>
 constexpr T inf = 0;
 template <>
@@ -69,30 +73,72 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 最大半连通子图
+// URL: https://www.acwing.com/problem/content/1177/
 // ===========================================================
+cint N = 1e5 + 5;
+cint M = 1e6 + 6;
 
-int n;
-priority_queue<int> pq;
+int n, m, mod;
+vi g[N], gs[N];
+int dfn[N], id[N], low[N], scnt = 0, tst = 0, sz[N];
+stack<int> stk;
+bitset<N> ins;
+unordered_set<ll> S;
+ll f[N], cnt[N];
+
+void add(vi G[], int a, int b) { G[a].push_back(b); }
+void scc(int u) {
+    low[u] = dfn[u] = ++tst;
+    stk.push(u), ins[u] = 1;
+    for (int v : g[u]) {
+        if (!dfn[v]) {
+            scc(v);
+            chmin(low[u], low[v]);
+        }
+        elif (ins[v]) chmin(low[u], dfn[v]);
+    }
+    if (low[u] == dfn[u]) {
+        int t;
+        ++scnt;
+        do {
+            t = stk.top();
+            stk.pop(), ins[t] = 0;
+            id[t] = scnt, sz[scnt]++;
+        } while (t != u);
+    }
+}
 
 void solve() {
-    cin >> n;
-    rep(n) {
-        int op;
-        cin >> op;
-        if (op == 1) {
-            int x;
-            cin >> x;
-            pq.push(x);
-        }
-        elif (op == 2) {
-            pq.pop();
-        }
-        else {
-            cout << pq.top() << "\n";
+    cin >> n >> m >> mod;
+    rep(m) {
+        int a, b;
+        cin >> a >> b;
+        add(g, a, b);
+    }
+    rep(i, n) if (!dfn[i]) scc(i);
+    rep(i, n) {
+        for (int j : g[i]) {
+            int a = id[i], b = id[j];
+            ll hs = (ll)a * M + b;
+            if (a != b && !S.count(hs)) {
+                add(gs, a, b), S.insert(hs);
+            }
         }
     }
+    per(i, scnt, 1) {
+        if (!f[i]) f[i] = sz[i], cnt[i] = 1;
+        for (int j : gs[i]) {
+            if (chmax(f[j], f[i] + 1)) cnt[j] = cnt[i];
+            elif (f[j] == f[i] + 1) cnt[j] = (cnt[j] + cnt[i]) % mod;
+        }
+    }
+    ll mx = 0, ans = 0;
+    rep(i, scnt) {
+        if (chmax(mx, f[i])) ans = cnt[i];
+        elif (mx == f[i]) ans = (ans + cnt[i]) % mod;
+    }
+    print(mx), print(ans);
 }
 
 signed main() {

@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -8,6 +7,10 @@ typedef unsigned long long ull;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
+template <class T>
+using vc = vector<T>;
+template <class T>
+using vvc = vc<vc<T>>;
 template <class T>
 constexpr T inf = 0;
 template <>
@@ -69,8 +72,8 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: A. 优先队列模板（例1.0）
+// URL: https://codeforces.com/gym/622183/problem/A
 // ===========================================================
 
 int n;
@@ -94,7 +97,6 @@ void solve() {
         }
     }
 }
-
 signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);

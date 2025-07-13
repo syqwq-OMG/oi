@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <queue>
 using namespace std;
 #define cint const int
 #define cdouble const double
@@ -8,6 +7,10 @@ typedef unsigned long long ull;
 typedef pair<ll, ll> PII;
 typedef vector<ll> vi;
 typedef vector<PII> vpii;
+template <class T>
+using vc = vector<T>;
+template <class T>
+using vvc = vc<vc<T>>;
 template <class T>
 constexpr T inf = 0;
 template <>
@@ -69,30 +72,67 @@ cint PRECISION = 5;
 // #define int long long
 // #define CF
 // ===========================================================
-// Problem: $(PROBLEM)
-// URL: $(URL)
+// Problem: 距离
+// URL: https://www.acwing.com/problem/content/1173/
 // ===========================================================
+cint N = 1e5 + 5;
+cint M = 2e5 + 5;
 
-int n;
-priority_queue<int> pq;
+int n, m;
+vpii g[N];
+int st[N], dis[N];
+vpii query[M];
+int ans[N];
+int fa[N];
 
-void solve() {
-    cin >> n;
-    rep(n) {
-        int op;
-        cin >> op;
-        if (op == 1) {
-            int x;
-            cin >> x;
-            pq.push(x);
-        }
-        elif (op == 2) {
-            pq.pop();
-        }
-        else {
-            cout << pq.top() << "\n";
+void add(int a, int b, int c) { g[a].push_back({b, c}); }
+void dfs(int u, int p) {
+    for (auto [v, w] : g[u]) {
+        if (v != p) {
+            dis[v] = dis[u] + w;
+            dfs(v, u);
         }
     }
+}
+int get(int x) {
+    if (fa[x] == x) return x;
+    return fa[x] = get(fa[x]);
+}
+void tarjan(int u) {
+    st[u] = 1;
+    for (auto [v, w] : g[u]) {
+        if (!st[v]) {
+            tarjan(v);
+            fa[v] = u;
+        }
+    }
+    for (auto [v, id] : query[u]) {
+        if (st[v] == 2) {
+            int anc = get(v);
+            ans[id] = dis[u] + dis[v] - 2 * dis[anc];
+        }
+    }
+    st[u] = 2;
+}
+void solve() {
+    cin >> n >> m;
+    rep(i, n) fa[i] = i;
+    rep(n - 1) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        add(a, b, c), add(b, a, c);
+    }
+    rep(i, m) {
+        int a, b;
+        cin >> a >> b;
+        if (a != b) {
+            query[a].push_back({b, i});
+            query[b].push_back({a, i});
+        }
+    }
+    dfs(1, -1);
+    tarjan(1);
+    rep(i, m) print(ans[i]);
 }
 
 signed main() {
